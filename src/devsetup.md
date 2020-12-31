@@ -1,7 +1,19 @@
-WiringPi 2.5 comes with Raspbian on Pi4.
-As per http://wiringpi.com/reference/i2c-library/ we need to install i2c drivers into the kernel:
+# Live Raspbian dev environment setup
+
+## I2C setup
+
+WiringPi 2.5 comes with Raspbian Buster on Pi4.
+As per http://wiringpi.com/reference/i2c-library/ the i2c drivers need to be installed into the kernel:
 
 ```
-gpio load i2c
+sudo raspi-config
 ```
-Oh - had to use sudo raspi-config to enable the i2c module via interfaces menu, then reboot.
+Then enable the i2c module via interfaces menu, and reboot.
+
+## VSCode setup
+
+
+
+# Cross compilation on non-PI platform (MacOS)
+
+TODO. Looks like a pain in the butt.

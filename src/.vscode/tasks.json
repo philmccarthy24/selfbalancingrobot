@@ -1,24 +1,36 @@
+// Makefile for premake working on VS code tasks 2.0
+// ${workspaceRoot} the path of the folder opened in VS Code
+// ${file} the current opened file
+// ${fileBasename} the current opened file's basename
+// ${fileDirname} the current opened file's dirname
+// ${fileExtname} the current opened file's extension
+// ${cwd} the task runner's current working directory on startup
 {
 	"version": "2.0.0",
+	"presentation": {
+		"echo": true,
+		"reveal": "always",
+		"focus": false,
+		"panel": "shared",
+		"showReuseMessage": true,
+		"clear": true
+	},
+	"type": "shell",
+	"problemMatcher": [],
+	"command": "make ",
 	"tasks": [
 		{
-			"type": "cppbuild",
-			"label": "C/C++: g++ build active file",
-			"command": "/bin/g++",
-			"args": [
-				"-g",
-				"${file}",
-				"-o",
-				"${fileDirname}/${fileBasenameNoExtension}"
-			],
-			"options": {
-				"cwd": "${workspaceFolder}"
+			"label": "Make debug",
+			"group": {
+				"kind": "build",
+				"isDefault": true
 			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": "build",
-			"detail": "compiler: /bin/g++"
+			
+		},
+		{
+			"label": "Make Release",
+			"type": "shell",
+			"args": ["config=release"]
 		}
 	]
 }
