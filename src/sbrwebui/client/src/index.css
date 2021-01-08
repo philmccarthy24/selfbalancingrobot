@@ -5,6 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  touch-action: none; /* necessary so that onPointerMove events aren't cancelled after a few ms on touch devices */
 }
 
 code {
