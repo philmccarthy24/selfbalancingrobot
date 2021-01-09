@@ -5,11 +5,17 @@
 namespace sbr 
 {
 
+    struct Orientation3D {
+        double m_dbPitch_deg;
+        double m_dbRoll_deg;
+        double m_dbYaw_deg;
+    };
+
     class ISpacialSensor 
     {
     public:
         ISpacialSensor() {}
         virtual ~ISpacialSensor() {}
-        virtual std::pair<double, double> ReadOrientation() = 0;
+        virtual Orientation3D ReadOrientation() = 0;
     };
 }

@@ -16,7 +16,7 @@ namespace sbr {
             MPU6050();
             virtual ~MPU6050();
 
-            virtual std::pair<double, double> ReadOrientation() override;
+            virtual Orientation3D ReadOrientation() override;
 
         private:
             unsigned short ReadHighLowI2CRegisters(int highRegister);
@@ -25,6 +25,9 @@ namespace sbr {
 
             int m_fdMPU6050;
             int m_nCountsPerG;
+            double m_dbDegreesPerSec;
+            int64_t m_tsOrientationLastRead;
+            Orientation3D m_lastReading;
 
             // primary I2C address
             static const int MPU6050_addr = 0x68;
@@ -32,11 +35,17 @@ namespace sbr {
             // registers
             static const int PWR_MGMT_1 = 0x6B;
             static const int ACCEL_CONFIG = 0x1C;
+            static const int GYRO_CONFIG = 0x1B;
             static const int ACCEL_XOUT_H = 0x3B;
             static const int ACCEL_YOUT_H = 0x3D;
             static const int ACCEL_ZOUT_H = 0x3F;
+            static const int GYRO_XOUT_H = 0x43;
+            static const int GYRO_YOUT_H = 0x45;
+            static const int GYRO_ZOUT_H = 0x47;
+
 
             // data maps
             static const int ACCEL_FS_COUNTS[];
+            static const double GYRO_FS_COUNTS[];
     };
 }
