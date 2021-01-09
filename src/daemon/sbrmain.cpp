@@ -15,7 +15,7 @@ int main()
 
         for (int i = 0; i < 100; i++) {
             auto currOrientation = pSpacialSensor->ReadOrientation();
-            cout << "X rotation " << currOrientation.first << " degrees, Y rotation " << currOrientation.second << "degrees" << endl;
+            cout << "X rotation " << currOrientation.m_dbPitch_deg << " degrees, Y rotation " << currOrientation.m_dbRoll_deg << "degrees" << endl;
             usleep(500 * 1000);
         }
     }

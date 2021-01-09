@@ -23,8 +23,9 @@ const double MPU6050::GYRO_FS_COUNTS[] = {
 };
 
 MPU6050::MPU6050() : 
-    m_lnMillisSinceOrientationLastRead(0)
+    m_tsOrientationLastRead(0)
 {
+    m_lastReading = {};
     m_fdMPU6050 = wiringPiI2CSetup(MPU6050_addr);
     if (m_fdMPU6050 == -1) {
         throw runtime_error("Could not setup MPU6050");

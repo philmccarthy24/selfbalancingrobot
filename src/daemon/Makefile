@@ -8,16 +8,17 @@
 # example from https://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/
 # need to use g++ not gc as g++ knows where C++ stdlib files are
 
-IDIR := ./
+I2CDIR := ./lib/I2Cdev
+MPU6050DIR := ./lib/MPU6050
 CXX := g++
-CXXFLAGS := -g -I$(IDIR)
+CXXFLAGS := -g -I$(I2CDIR) -I$(MPU6050DIR)
 
 ODIR=obj
 LDIR =../lib
 
 LIBS=-lwiringPi -lm
 
-OUTFILE = sbrcore
+OUTFILE = sbrcontrold
 
 _DEPS = ISpacialSensor.h MPU6050.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
