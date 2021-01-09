@@ -16,7 +16,7 @@ CXXFLAGS := -g -I$(I2CDIR) -I$(MPU6050DIR)
 ODIR=obj
 LDIR =../lib
 
-LIBS=-lwiringPi -lm
+LIBS=-lwiringPi
 
 OUTFILE = sbrcontrold
 
@@ -29,6 +29,8 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 $(ODIR)/%.o: %.cpp $(DEPS)
 	mkdir -p $(ODIR)
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
+
+# can we build the libs as a pre-step, then link in with rest of code? or just create .o files for libs?
 
 debug: $(OBJ)
 	$(CXX) -o $(OUTFILE) $^ $(LIBS) $(CXXFLAGS)
