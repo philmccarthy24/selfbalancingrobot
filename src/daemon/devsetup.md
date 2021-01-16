@@ -25,6 +25,9 @@ sudo raspi-config
 ```
 Then enable the i2c module via interfaces menu, and reboot.
 
+Really useful paper: https://mjwhite8119.github.io/Robots/mpu6050
+
+
 ## VSCode setup
 
 

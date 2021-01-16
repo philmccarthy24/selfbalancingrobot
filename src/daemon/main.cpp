@@ -6,9 +6,39 @@
 using namespace std;
 //using namespace sbr;
 
+/*
+void readFifoBuffer_() {
+  // Clear the buffer so as we can get fresh values
+  // The sensor is running a lot faster than our sample period
+  mpu.resetFIFO();
+  
+  // get current FIFO count
+  fifoCount = mpu.getFIFOCount();
+  
+  // wait for correct available data length, should be a VERY short wait
+  while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+
+  // read a packet from FIFO
+  mpu.getFIFOBytes(fifoBuffer, packetSize);
+}
+*/
+
 int main()
 {
     cout << "hello world" << endl;
+
+    MPU6050 mpu;
+    mpu.initialize();
+    //mpu.dmpInitialize();
+
+    /*mpu.dmpGetQuaternion(&q, fifoBuffer);
+    mpu.dmpGetGravity(&gravity, &q);
+    mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+
+    float pitch = ypr[1] * 180/M_PI;
+    */
+
+
     /*
     try {
 
