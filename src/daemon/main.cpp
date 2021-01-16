@@ -4,10 +4,12 @@
 #include "MPU6050.h"
 
 using namespace std;
-using namespace sbr;
+//using namespace sbr;
 
 int main()
 {
+    cout << "hello world" << endl;
+    /*
     try {
 
     
@@ -22,6 +24,7 @@ int main()
     catch (const std::exception& ex) {
         cout << ex.what() << endl;
     }
+    */
 }
 
 //https://code.visualstudio.com/docs/languages/cpp

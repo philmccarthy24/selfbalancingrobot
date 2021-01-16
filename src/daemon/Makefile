@@ -8,32 +8,38 @@
 # example from https://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/
 # need to use g++ not gc as g++ knows where C++ stdlib files are
 
-I2CDIR := ./lib/I2Cdev
-MPU6050DIR := ./lib/MPU6050
+.DEFAULT_GOAL := release
+
 CXX := g++
-CXXFLAGS := -g -I$(I2CDIR) -I$(MPU6050DIR)
+CXXFLAGS := -I./ -Ilib/I2Cdev -Ilib/MPU6050
+
+VPATH=lib/I2Cdev:lib/MPU6050
 
 ODIR=obj
-LDIR =../lib
+LDIR=
+LIBS=-lbcm2835
+OUTFILE = sbrcontrollerd
 
-LIBS=-lwiringPi
+DEPS = ISpacialSensor.h lib/I2Cdev/I2Cdev.h lib/MPU6050/MPU6050.h
 
-OUTFILE = sbrcontrold
-
-_DEPS = ISpacialSensor.h MPU6050.h
-DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
-
-_OBJ = MPU6050.o sbrmain.o 
+_OBJ = main.o I2Cdev.o MPU6050.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.cpp $(DEPS)
-	mkdir -p $(ODIR)
+	@mkdir -p $(@D)
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
-# can we build the libs as a pre-step, then link in with rest of code? or just create .o files for libs?
+debug: CXXFLAGS += -DDEBUG -g
+debug: OUTDIR = bin/debug
+debug: executable
 
-debug: $(OBJ)
-	$(CXX) -o $(OUTFILE) $^ $(LIBS) $(CXXFLAGS)
+release: CXXFLAGS += -O2 -Wall
+release: OUTDIR = bin/release
+release: executable
+
+executable: $(OBJ)
+	@mkdir -p $(OUTDIR)
+	$(CXX) -o $(OUTDIR)/$(OUTFILE) $^ $(LIBS) $(CXXFLAGS)
 
 .PHONY: clean
 

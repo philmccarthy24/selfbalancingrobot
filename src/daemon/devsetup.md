@@ -2,8 +2,23 @@
 
 ## I2C setup
 
-WiringPi 2.5 comes with Raspbian Buster on Pi4.
-As per http://wiringpi.com/reference/i2c-library/ the i2c drivers need to be installed into the kernel:
+Couple of choices interfacing with I2C: WiringPi 2.5 comes with Raspbian Buster on Pi4.
+(http://wiringpi.com/reference/i2c-library/)
+The Jeff Rowberg MPU6050 lib that makes use of the onboard motion processor / FIFO and returns
+Quarternions that can be converted into roll/pitch/yaw, uses the BCM2835 lib here:
+http://www.airspayce.com/mikem/bcm2835/index.html
+This is better as we don't then need to do further filtering (eg complementary / kalman from seperate raw sensors)
+bcm2835 is installed using
+```
+tar zxvf bcm2835-1.xx.tar.gz
+cd bcm2835-1.xx
+./configure
+make
+sudo make check
+sudo make install
+```
+
+The i2c drivers need to be enabled to the kernel:
 
 ```
 sudo raspi-config
