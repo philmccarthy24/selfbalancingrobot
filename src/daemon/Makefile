@@ -1,36 +1,51 @@
-# TODO: Add in debug and release targets, and put in optimisation
-# for release build, and symbols for debug build.
-# this might point the way:
-# https://stackoverflow.com/questions/1079832/how-can-i-configure-my-makefile-for-debug-and-release-builds
-# vscode task was got from here: https://gist.github.com/Hirosam1/a49fd002a365c976d3201a9c9d5f6918
-# need to tweak to get the two building the right target.
+#############################################################
+#
+# Compiles named cpp files. Handles source files in nested
+# directories using VPATH trick.
+#
+# (update _OBJ to control cpps built, VPATH to add additional
+# source directories, and CXXFLAGS to add additional include 
+# directories). 
+#
+# Puts obj files in obj/.
+# "debug" target outputs to bin/debug/, default ("release") target
+# outputs to bin/release/.
+#
+# Munged together from a lot of places, it's quite clunky
+# but works.
+# Phil McCarthy Jan 2021
+#
+#############################################################
+.DEFAULT_GOAL := release
 
-# example from https://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/
-# need to use g++ not gc as g++ knows where C++ stdlib files are
-
-IDIR := ./
 CXX := g++
-CXXFLAGS := -g -I$(IDIR)
+CXXFLAGS := -I./ -Iimu
+
+VPATH=imu
 
 ODIR=obj
-LDIR =../lib
-
+LDIR=
 LIBS=-lwiringPi -lm
+OUTFILE = sbrcontrollerd
 
-OUTFILE = sbrcore
-
-_DEPS = ISpacialSensor.h MPU6050.h
-DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
-
-_OBJ = MPU6050.o sbrmain.o 
+_OBJ = main.o MPU6050.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-$(ODIR)/%.o: %.cpp $(DEPS)
-	mkdir -p $(ODIR)
+$(ODIR)/%.o: %.cpp
+	@mkdir -p $(@D)
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
-debug: $(OBJ)
-	$(CXX) -o $(OUTFILE) $^ $(LIBS) $(CXXFLAGS)
+debug: CXXFLAGS += -DDEBUG -g
+debug: OUTDIR = bin/debug
+debug: executable
+
+release: CXXFLAGS += -O2 -Wall
+release: OUTDIR = bin/release
+release: executable
+
+executable: $(OBJ)
+	@mkdir -p $(OUTDIR)
+	$(CXX) -o $(OUTDIR)/$(OUTFILE) $^ $(LIBS) $(CXXFLAGS)
 
 .PHONY: clean
 
