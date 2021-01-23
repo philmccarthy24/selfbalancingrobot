@@ -19,9 +19,6 @@ MPU6050Accel::MPU6050Accel(std::shared<MPU6050I2C> pSensorComs) :
     m_pSensorComs(pSensorComs)
 {
     m_nCountsPerG = ACCEL_FS_COUNTS[m_pSensorComs->ReadAccelFS()];
-    
-    
-    
 
     //... there's a way to do a calibration as well
     // for both accel and gyro. Should we support this?
@@ -54,6 +51,7 @@ Orientation3D MPU6050Accel::ReadOrientation()
     Orientation3D oriResult;
     oriResult.m_dbRoll_deg = -RadsToDegrees(atan2(accX, Dist(accY, accZ)));
     oriResult.m_dbPitch_deg = RadsToDegrees(atan2(accY, Dist(accX, accZ)));
+    
 }
 
 }

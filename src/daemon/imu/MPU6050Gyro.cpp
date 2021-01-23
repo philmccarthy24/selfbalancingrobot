@@ -19,9 +19,11 @@ const double MPU6050Gyro::GYRO_FS_COUNTS[] = {
     16.4  // range of gyroscope is +-2000deg/s
 };
 
-MPU6050Gyro::MPU6050Gyro(): 
-    m_lnMillisSinceOrientationLastRead(0)
+MPU6050Gyro::MPU6050Gyro(std::shared<MPU6050I2C> sensorComs, std::weak_ptr<ISpacialSensor> initialReferenceSensor): 
+    m_lnMillisSinceOrientationLastRead(0),
+    m_pSensorComs(sensorComs)
 {
+    std::move(m_pInitialReferenceSensor(initialReferenceSensor));
     m_dbDegreesPerSec = GYRO_FS_COUNTS[m_pSensorComs->ReadGyroFS()];
 
     //... there's a way to do a calibration as well

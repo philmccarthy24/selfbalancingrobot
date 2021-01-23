@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include "ISpacialSensor.h"
 
 namespace sbrcontroller
@@ -12,7 +13,7 @@ namespace sbrcontroller
         {
         public:
         // going to need the accelerometer for initial reading - weak ptr?
-            MPU6050Gyro(std::shared<MPU6050I2C> pSensorComs);
+            MPU6050Gyro(std::shared<MPU6050I2C> sensorComs, std::weak_ptr<ISpacialSensor> initialReferenceSensor);
             virtual ~MPU6050Gyro();
             virtual Orientation3D ReadOrientation() override;
 
@@ -23,6 +24,7 @@ namespace sbrcontroller
             double m_dbDegreesPerSec;
 
             std::shared<MPU6050I2C> m_pSensorComs;
+            std::weak_ptr<ISpacialSensor> m_pInitialReferenceSensor;
 
             // data maps
             static const double GYRO_FS_COUNTS[];
