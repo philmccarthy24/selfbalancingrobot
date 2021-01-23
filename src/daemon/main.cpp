@@ -9,14 +9,17 @@ using namespace sbrcontroller::imu;
 int main()
 {
     try {
-
-    
-        std::unique_ptr<ISpacialSensor> pSpacialSensor = make_unique<MPU6050>();
+        std::unique_ptr<IIMU> pIMU = make_unique<MPU6050>();
 
         for (int i = 0; i < 100; i++) {
-            auto currOrientation = pSpacialSensor->ReadOrientation();
+            auto currOrientation = pIMU->ReadOrientation();
             cout << "X rotation " << currOrientation.m_dbRoll_deg << " degrees, Y rotation " << currOrientation.m_dbPitch_deg << "degrees" << endl;
-            usleep(50 * 1000);
+            usleep(100 * 1000);
+            // seem to be drifting quite a bit (+/- 1degree) even when still. is this
+            // sensor noise?
+            // https://wired.chillibasket.com/2015/01/calibrating-mpu6050/ has some stuff about
+            // fifo. calibrate? read from mp fifo?
+            // raw signal synchronisation issue?? https://electronics.stackexchange.com/questions/333174/mpu6050-accel-gyro-noise-that-behaves-strangely-what-might-be-doing-this
         }
     }
     catch (const std::exception& ex) {

@@ -19,7 +19,7 @@
 .DEFAULT_GOAL := release
 
 CXX := g++
-CXXFLAGS := -I./ -Iimu
+CXXFLAGS := -I./ -Iimu -pthread
 
 VPATH=imu
 
@@ -28,7 +28,7 @@ LDIR=
 LIBS=-lwiringPi -lm
 OUTFILE = sbrcontrollerd
 
-_OBJ = main.o MPU6050.o
+_OBJ = main.o MPU6050.o Madgwick.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.cpp

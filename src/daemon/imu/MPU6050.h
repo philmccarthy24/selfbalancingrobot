@@ -1,5 +1,7 @@
 #pragma once
-#include "ISpacialSensor.h"
+#include <thread>
+#include "IIMU.h"
+#include "Madgwick.h"
 
 namespace sbrcontroller {
     namespace imu {
@@ -15,36 +17,37 @@ namespace sbrcontroller {
      * (returning quarternions that can be converted to pitch/roll/yaw), however 
      * reading to a buffer over I2C using WiringPi isn't currently available.
      * Jeff Rowland's MPU6050/DMP code has been ported to older Pis via the 
-     * bcm2835 lib, but the i2c lib that uses it (or bcm2835) seems broken on Pi4.
+     * bcm2835 lib, but the i2c lib that uses it (or bcm2835) is broken on Pi4.
+     * 
      * This is an area to investigate, but to keep perfect being the enemy of good,
-     * will use the raw readings along with a complimentary filter (and possibly
-     * a moving average filter if there's lots of noise).
-     * Kalman filter is probably overkill for this application (full 3d orientation
-     * using gyroscope would require one, but we're just reading pitch)
+     * will use the raw readings along with a Madgwick filter (which has superior
+     * accuracy and less computational overhead than a Kalman filter, see 
+     * https://x-io.co.uk/open-source-imu-and-ahrs-algorithms/. This might well be
+     * what the MP chip uses under the hood)
      */ 
-    class MPU6050I2C
+    class MPU6050 : public IIMU 
     {
         public:
-            MPU6050I2C(bool bEnableRawReads);
-            virtual ~MPU6050I2C();
+            MPU6050();
+            virtual ~MPU6050();
 
-            struct RawCounts
-            {
-                short A;
-                short B;
-                short C;
-            };
-
-            virtual int ReadAccelFS();
-            virtual int ReadGyroFS();
-            
-            virtual RawCounts ReadAccelerometerRaw();
-            virtual RawCounts ReadGyroRaw();
+            virtual Orientation3D ReadOrientation() override;
 
         private:
             unsigned short ReadHighLowI2CRegisters(int highRegister);
-            
+            void RawSampleUpdateThreadProc();
+            inline double RadiansToDegrees(double radians);
+            inline double DegreesToRadians(double degrees);
+
             int m_fdMPU6050;
+            int m_nCountsPerG;
+            float m_fDegreesPerSec;
+
+            std::thread m_tSampleUpdateThread;
+            Madgwick m_imuFilter;
+            volatile bool m_bKillSignal;
+
+            static const int SENSOR_SAMPLE_PERIOD_HZ = 20;
 
             // primary I2C address
             static const int MPU6050_addr = 0x68;
@@ -59,6 +62,10 @@ namespace sbrcontroller {
             static const int GYRO_XOUT_H = 0x43;
             static const int GYRO_YOUT_H = 0x45;
             static const int GYRO_ZOUT_H = 0x47;
+
+            // data maps
+            static const int ACCEL_FS_COUNTS[];
+            static const double GYRO_FS_COUNTS[];
     };
     }
 }

@@ -8,16 +8,16 @@ namespace sbrcontroller
     {
 
         struct Orientation3D {
-            double m_dbPitch_deg;
             double m_dbRoll_deg;
+            double m_dbPitch_deg;
             double m_dbYaw_deg;
         };
 
-        class ISpacialSensor 
+        class IIMU 
         {
         public:
-            ISpacialSensor() {}
-            virtual ~ISpacialSensor() {}
+            IIMU() {}
+            virtual ~IIMU() {}
             virtual Orientation3D ReadOrientation() = 0;
         };
 
