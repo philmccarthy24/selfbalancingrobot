@@ -1,19 +1,22 @@
 #include <iostream>
 #include <memory>
 #include <unistd.h>
-#include "MPU6050.h"
+#include "Register.h"
+#include "SBRProdFactory.h"
 
 using namespace std;
-using namespace sbrcontroller::imu;
+using namespace sbrcontroller;
 
 int main()
 {
     try {
-        std::unique_ptr<IIMU> pIMU = make_unique<MPU6050>();
+        // production startup process
+        utility::Register::RegisterFactory(make_shared<utility::SBRProdFactory>("./sbrconfig.json"));
+        auto ahrsDataSource = utility::Register::Factory.CreateAHRSDataSource();
 
         for (int i = 0; i < 100; i++) {
-            auto currOrientation = pIMU->ReadOrientation();
-            cout << "X rotation " << currOrientation.m_dbRoll_deg << " degrees, Y rotation " << currOrientation.m_dbPitch_deg << "degrees" << endl;
+            auto currOrientation = ahrsDataSource->ReadOrientation();
+            cout << "X rotation " << currOrientation. << " degrees, Y rotation " << currOrientation.m_dbPitch_deg << "degrees" << endl;
             usleep(100 * 1000);
             // seem to be drifting quite a bit (+/- 1degree) even when still. is this
             // sensor noise?
