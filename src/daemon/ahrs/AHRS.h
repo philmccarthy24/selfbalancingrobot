@@ -46,8 +46,9 @@ namespace sbrcontroller
         public:
             IAHRSFusionAlgorithm() {}
             virtual ~IAHRSFusionAlgorithm() {}
-            virtual void Update(Axis3DSensorData gyroData, Axis3DSensorData accelData, Axis3DSensorData magData) = 0;
-            virtual void UpdateIMU(Axis3DSensorData gyroData, Axis3DSensorData accelData) = 0;
+            virtual bool IsHardwareImplementation() = 0;
+            virtual void Update(const Axis3DSensorData& gyroData, const Axis3DSensorData& accelData, const Axis3DSensorData& magData) = 0;
+            virtual void UpdateIMU(const Axis3DSensorData& gyroData, const Axis3DSensorData& accelData) = 0;
 
             virtual std::future<Quarternion> ReadFusedSensorDataAsync() = 0;
         };

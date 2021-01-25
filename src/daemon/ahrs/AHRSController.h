@@ -1,23 +1,19 @@
 #pragma once
 #include "AHRS.h"
 #include <memory>
+#include <vector>
 
 namespace sbrcontroller
 {
     namespace ahrs
     {
+        class ISensor;
 
         class AHRSController : public IAHRSDataSource
         {
         public:
             AHRSController(std::shared_ptr<IAHRSFusionAlgorithm> fusionAlgorithm,
-                std::shared_ptr<ISensor> gyro, 
-                std::shared_ptr<ISensor> accel,
-                int sensorSamplePeriodHz);
-            AHRSController(std::shared_ptr<IAHRSFusionAlgorithm> fusionAlgorithm,
-                std::shared_ptr<ISensor> gyro, 
-                std::shared_ptr<ISensor> accel,
-                std::shared_ptr<ISensor> mag,
+                const std::vector<std::shared_ptr<ISensor>>& sensors,
                 int sensorSamplePeriodHz);
             virtual ~AHRSController();
 

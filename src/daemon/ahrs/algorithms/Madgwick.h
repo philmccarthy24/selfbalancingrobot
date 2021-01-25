@@ -25,16 +25,11 @@ namespace sbrcontroller {
                 Madgwick(float sampleFreq, float betaDef = 0.1f);
                 ~Madgwick();
 
-                // for sensor data with magnetometer (AHRS)
-                void Update9dofAHRS(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz);
-                
-                // for 6dof IMU sensors
-                // gx, gy and gz in radians per second
-                // ax, ay and az in any unit
-                void Update6dofIMU(float gx, float gy, float gz, float ax, float ay, float az);
+                virtual bool IsHardwareImplementation() override;
+                virtual void Update(const Axis3DSensorData& gyroData, const Axis3DSensorData& accelData, const Axis3DSensorData& magData) override;
+                virtual void UpdateIMU(const Axis3DSensorData& gyroData, const Axis3DSensorData& accelData) override;
 
-                // !this will deadlock if Update6dofIMU is called on same thread as caller
-                std::future<Quarternion> RequestSensorReading();
+                virtual std::future<Quarternion> ReadFusedSensorDataAsync() override;
 
             private:
                 float invSqrt(float x);
