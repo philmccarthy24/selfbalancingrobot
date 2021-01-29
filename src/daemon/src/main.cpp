@@ -38,3 +38,7 @@ int main()
 
 
 //https://wiki.dfrobot.com/How_to_Use_a_Three-Axis_Accelerometer_for_Tilt_Sensing ??
+
+
+// see this to get vcpkg working on linux: 
+https://github.com/microsoft/vcpkg
