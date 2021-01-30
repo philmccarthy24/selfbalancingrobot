@@ -41,32 +41,10 @@ namespace sbrcontroller
             virtual Ori3DRads ReadOrientation() = 0;
         };
 
-        class IAHRSFusionAlgorithm
-        {
-        public:
-            IAHRSFusionAlgorithm() {}
-            virtual ~IAHRSFusionAlgorithm() {}
-            virtual bool IsHardwareImplementation() = 0;
-            virtual void Update(const Axis3DSensorData& gyroData, const Axis3DSensorData& accelData, const Axis3DSensorData& magData) = 0;
-            virtual void UpdateIMU(const Axis3DSensorData& gyroData, const Axis3DSensorData& accelData) = 0;
-
-            virtual std::future<Quarternion> ReadFusedSensorDataAsync() = 0;
-        };
-
         enum ESensorType {
             Gyroscope,
             Accelerometer,
             Magnetometor
-        };
-
-        class ISensor
-        {
-        public:
-            ISensor() {}
-            virtual ~ISensor() {}
-            virtual ESensorType GetType() = 0;
-            virtual std::string GetDeviceInfo() = 0;
-            virtual SensorData GetData() = 0;
         };
 
         struct SensorData
@@ -80,6 +58,28 @@ namespace sbrcontroller
             float x;
             float y;
             float z;
+        };
+
+        class ISensor
+        {
+        public:
+            ISensor() {}
+            virtual ~ISensor() {}
+            virtual ESensorType GetType() = 0;
+            virtual std::string GetDeviceInfo() = 0;
+            virtual SensorData GetData() = 0;
+        };
+
+        class IAHRSFusionAlgorithm
+        {
+        public:
+            IAHRSFusionAlgorithm() {}
+            virtual ~IAHRSFusionAlgorithm() {}
+            virtual bool IsHardwareImplementation() = 0;
+            virtual void Update(const Axis3DSensorData& gyroData, const Axis3DSensorData& accelData, const Axis3DSensorData& magData) = 0;
+            virtual void UpdateIMU(const Axis3DSensorData& gyroData, const Axis3DSensorData& accelData) = 0;
+
+            virtual std::future<Quarternion> ReadFusedSensorDataAsync() = 0;
         };
 
         // In terms of design, there should be an AHRSController that has an internal thread,

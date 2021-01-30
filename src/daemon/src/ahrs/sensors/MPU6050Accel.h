@@ -11,6 +11,8 @@ namespace sbrcontroller {
     namespace ahrs {
         namespace sensors {
 
+            
+
             /***
              * Provides low level access to the MPU6050 6 axis gyroscope IC over an
              * I2C bus, and returns sensor data converted from raw counts to SI units.
@@ -33,7 +35,7 @@ namespace sbrcontroller {
             class MPU6050Accel : public ISensor 
             {
                 public:
-                    MPU6050Accel();
+                    MPU6050Accel(std::shared_ptr<coms::II2CDevice> pI2CDevice);
                     virtual ~MPU6050Accel();
 
                     virtual ESensorType GetType() override;
@@ -45,7 +47,7 @@ namespace sbrcontroller {
                     int m_nCountsPerG;
 
                     // primary I2C address
-                    static const int MPU6050_addr = 0x68;
+                    
 
                     // registers
                     static const int PWR_MGMT_1 = 0x6B;

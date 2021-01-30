@@ -2,7 +2,9 @@
 #include <memory>
 #include <unistd.h>
 #include "Register.h"
+#include "JSONConfigProvider.h"
 #include "SBRProdFactory.h"
+#include "AHRS.h"
 
 using namespace std;
 using namespace sbrcontroller;
@@ -11,8 +13,9 @@ int main()
 {
     try {
         // production startup process
-        utility::Register::RegisterFactory(make_shared<utility::SBRProdFactory>("./sbrconfig.json"));
-        auto ahrsDataSource = utility::Register::Factory.CreateAHRSDataSource();
+        utility::Register::RegisterConfigProvider(make_shared<utility::JSONConfigProvider>("./sbrconfig.json"));
+        utility::Register::RegisterFactory(make_shared<utility::SBRProdFactory>());
+        auto ahrsDataSource = utility::Register::Factory().CreateAHRSDataSource();
 
         for (int i = 0; i < 100; i++) {
             auto currOrientation = ahrsDataSource->ReadOrientation();
@@ -39,6 +42,3 @@ int main()
 
 //https://wiki.dfrobot.com/How_to_Use_a_Three-Axis_Accelerometer_for_Tilt_Sensing ??
 
-
-// see this to get vcpkg working on linux: 
-https://github.com/microsoft/vcpkg

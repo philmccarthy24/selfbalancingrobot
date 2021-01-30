@@ -4,6 +4,9 @@
 namespace sbrcontroller {
     namespace utility {
 
+        std::shared_ptr<ISBRFactory> Register::m_pFactory;
+        std::shared_ptr<IConfigProvider> Register::m_pConfig;
+
         Register::Register()
         {
         }
@@ -12,12 +15,14 @@ namespace sbrcontroller {
         {
         }
 
+        void Register::RegisterConfigProvider(std::shared_ptr<IConfigProvider> pConfigProvider)
+        {
+            std::swap(m_pConfig, pConfigProvider);
+        }
+
         void Register::RegisterFactory(std::shared_ptr<ISBRFactory> pFactory)
         {
             std::swap(m_pFactory, pFactory);
-            if (m_pRootConfig == nullptr) {
-                m_pRootConfig = m_pFactory->CreateConfig();
-            }
         }
         
         const ISBRFactory& Register::Factory()
@@ -25,9 +30,9 @@ namespace sbrcontroller {
             return *m_pFactory;
         }
         
-        const IConfigSection& Register::RootConfig()
+        const IConfigProvider& Register::Config()
         {
-            return *m_pRootConfig;
+            return *m_pConfig;
         }
     
     }

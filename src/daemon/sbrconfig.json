@@ -1,8 +1,8 @@
 {
-    "AHRS": {
-        "FusionAlgorithm": "Madgwick",
-        "SensorSampleRateHz": 20,
-        "Sensors": [
+    "ahrs": {
+        "fusionAlgorithm": "Madgwick",
+        "sensorSampleRateHz": 20,
+        "sensors": [
             "MPU6050_gyro",
             "MPU6050_accel"
         ]
