@@ -7,7 +7,7 @@ namespace sbrcontroller {
         enum ESensorType {
             Gyroscope,
             Accelerometer,
-            Magnetometor
+            Magnetometer
         };
 
         enum ESensorDataType {

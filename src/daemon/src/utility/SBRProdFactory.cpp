@@ -2,11 +2,18 @@
 #include "Register.h"
 #include "IConfigProvider.h"
 #include "sbrcontroller.h"
+#include "sensors.h"
 #include "Madgwick.h"
 #include "MPU6050Accel.h"
 #include "MPU6050Gyro.h"
 #include "Pi4I2CDevice.h"
+#include "WiringPiWrapper.h"
 #include "AHRSController.h"
+
+using namespace sbrcontroller::sensors;
+using namespace sbrcontroller::coms;
+using namespace sbrcontroller::ahrs;
+using namespace std;
 
 namespace sbrcontroller {
     namespace utility {
@@ -19,16 +26,16 @@ namespace sbrcontroller {
             {
             }
 
-            std::shared_ptr<coms::II2CDevice> SBRProdFactory::CreateI2CDevice(int deviceId)
+            std::shared_ptr<II2CDevice> SBRProdFactory::CreateI2CDevice(int deviceId)
             {
-                return make_shared<coms::Pi4I2CDevice>(deviceId);
+                return make_shared<WiringPiWrapper>(deviceId);
             }
 
             std::shared_ptr<ahrs::IAHRSDataSource> SBRProdFactory::CreateAHRSDataSource()
             {
                 auto fusionAlgorithm = CreateFusionAlgorithm();
                 
-                std::vector<std::shared_ptr<ahrs::ISensor>> sensors;
+                std::vector<std::shared_ptr<ISensor>> sensors;
                 auto sensorIds = Register::Config().GetConfigValues(AHRS_SENSOR_IDS_KEY);
                 for (auto sensorId : sensorIds)
                 {

@@ -1,3 +1,16 @@
+include(FetchContent)
+
+FetchContent_Declare(json
+  #GIT_REPOSITORY https://github.com/nlohmann/json.git
+  GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
+  GIT_TAG v3.7.3)
+
+FetchContent_GetProperties(json)
+if(NOT json_POPULATED)
+  FetchContent_Populate(json)
+  add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
 set(utility_files
   IConfigProvider.h
   JSONConfigProvider.h
@@ -8,5 +21,17 @@ set(utility_files
   SBRProdFactory.h
   SBRProdFactory.cpp
 )
+
 add_library(utility ${utility_files})
-target_include_directories(utility PRIVATE ./ ../ ../ahrs ../ahrs/sensors ../ahrs/algorithms ../coms)
+
+set(utility_includes
+./
+../
+../ahrs
+../ahrs/sensors
+../ahrs/algorithms
+../coms
+)
+
+target_link_libraries(utility PRIVATE nlohmann_json::nlohmann_json)
+target_include_directories(utility PRIVATE ${utility_includes})

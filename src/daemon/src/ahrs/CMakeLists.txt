@@ -7,4 +7,5 @@ set(ahrs_source_files
 add_subdirectory(algorithms)
 add_subdirectory(sensors)
 add_library(ahrs ${ahrs_source_files})
+target_link_libraries(ahrs PRIVATE algorithms sensors)
 target_include_directories(ahrs PRIVATE ../)

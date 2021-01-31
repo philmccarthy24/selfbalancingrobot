@@ -1,6 +1,10 @@
 #include "AHRSController.h"
 #include "AHRS.h"
 #include "sbrcontroller.h"
+#include "sensors.h"
+
+using namespace sbrcontroller::sensors;
+using namespace std;
 
 namespace sbrcontroller {
     namespace ahrs {
@@ -15,7 +19,7 @@ namespace sbrcontroller {
             for (auto&& sensor : sensors) {
                 auto sensorInfo = sensor->GetDeviceInfo();
                 switch (sensorInfo.sensorType) {
-                    case ESensorType::Gyroscope: m_pGyrsoSensor = sensor; break;
+                    case ESensorType::Gyroscope: m_pGyroSensor = sensor; break;
                     case ESensorType::Accelerometer: m_pAccelSensor = sensor; break;
                     case ESensorType::Magnetometer: m_pMagSensor = sensor; break;
                 };
@@ -47,7 +51,7 @@ namespace sbrcontroller {
                 if (m_pAccelSensor->ReadSensorData(reinterpret_cast<unsigned char*>(&accelDataGsPerSec), sizeof(TripleAxisData)) != sizeof(TripleAxisData))
                         throw errorhandling::InvalidOperationException("Could not read accel data");
 
-                if (m_pMagSensor != null) {
+                if (m_pMagSensor != nullptr) {
                     if (m_pMagSensor->ReadSensorData(reinterpret_cast<unsigned char*>(&magDataGauss), sizeof(TripleAxisData)) != sizeof(TripleAxisData))
                         throw errorhandling::InvalidOperationException("Could not read mag data");
                     
