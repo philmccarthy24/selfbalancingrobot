@@ -41,7 +41,7 @@ namespace sbrcontroller {
 				return false;
 			}
 
-			void Madgwick::Update(const Axis3DSensorData& gyroData, const Axis3DSensorData& accelData, const Axis3DSensorData& magData)
+			void Madgwick::Update(const sensors::TripleAxisData& gyroData, const sensors::TripleAxisData& accelData, const sensors::TripleAxisData& magData)
 			{
 				float recipNorm;
 				float s0, s1, s2, s3;
@@ -55,8 +55,8 @@ namespace sbrcontroller {
 					return;
 				}
 
-				Axis3DSensorData acc = accelData;
-				Axis3DSensorData mag = magData;
+				sensors::TripleAxisData acc = accelData;
+				sensors::TripleAxisData mag = magData;
 
 				// Rate of change of quaternion from gyroscope
 				qDot1 = 0.5f * (-m_q.x * gyroData.x - m_q.y * gyroData.y - m_q.z * gyroData.z);
@@ -144,7 +144,7 @@ namespace sbrcontroller {
 			//---------------------------------------------------------------------------------------------------
 			// IMU algorithm update
 
-			void Madgwick::UpdateIMU(const Axis3DSensorData& gyroData, const Axis3DSensorData& accelData)
+			void Madgwick::UpdateIMU(const sensors::TripleAxisData& gyroData, const sensors::TripleAxisData& accelData)
 			{
 				float recipNorm;
 				float s0, s1, s2, s3;
@@ -161,7 +161,7 @@ namespace sbrcontroller {
 				if(!((accelData.x == 0.0f) && (accelData.y == 0.0f) && (accelData.z == 0.0f))) {
 
 					// Normalise accelerometer measurement
-					Axis3DSensorData acc = accelData;
+					sensors::TripleAxisData acc = accelData;
 					recipNorm = invSqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
 					acc.x *= recipNorm;
 					acc.y *= recipNorm;

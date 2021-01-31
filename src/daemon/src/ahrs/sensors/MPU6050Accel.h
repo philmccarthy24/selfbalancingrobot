@@ -1,6 +1,7 @@
 #pragma once
-#include <thread>
+
 #include "AHRS.h"
+#include "sensors.h"
 
 namespace sbrcontroller {
 
@@ -26,28 +27,19 @@ namespace sbrcontroller {
              * Jeff Rowland's MPU6050/DMP code has been ported to older Pis via the 
              * bcm2835 lib, but the i2c lib that uses it (or bcm2835) is broken on Pi4.
              * 
-             * This is an area to investigate, but to keep perfect being the enemy of good,
-             * will use the raw readings along with a Madgwick filter (which has superior
-             * accuracy and less computational overhead than a Kalman filter, see 
-             * https://x-io.co.uk/open-source-imu-and-ahrs-algorithms/. This might well be
-             * what the MP chip uses under the hood)
              */ 
-            class MPU6050Accel : public ISensor 
+            class MPU6050Accel : public sbrcontroller::sensors::ISensor 
             {
                 public:
                     MPU6050Accel(std::shared_ptr<coms::II2CDevice> pI2CDevice);
                     virtual ~MPU6050Accel();
 
-                    virtual ESensorType GetType() override;
-                    virtual std::string GetDeviceInfo() override;
-                    virtual SensorData GetData() override;
+                    virtual sbrcontroller::sensors::SensorInfo GetDeviceInfo() override;
+                    virtual int ReadSensorData(unsigned char* buffer, unsigned int length) override;
 
                 private:
                     std::shared_ptr<coms::II2CDevice> m_pMPU6050;
                     int m_nCountsPerG;
-
-                    // primary I2C address
-                    
 
                     // registers
                     static const int PWR_MGMT_1 = 0x6B;

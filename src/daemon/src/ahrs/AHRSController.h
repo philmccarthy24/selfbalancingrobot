@@ -2,6 +2,7 @@
 #include "AHRS.h"
 #include <memory>
 #include <vector>
+#include <thread>
 
 namespace sbrcontroller
 {
@@ -30,7 +31,7 @@ namespace sbrcontroller
             std::shared_ptr<ISensor> m_pMagSensor;
             int m_nSensorSamplePeriodHz;
             volatile bool m_bKillSignal;
-        }
+        };
 
     }
 }

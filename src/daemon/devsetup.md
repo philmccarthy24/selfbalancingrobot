@@ -12,7 +12,14 @@ Then enable the i2c module via interfaces menu, and reboot.
 
 ## VSCode setup
 
+Install extensions
+- Microsoft C/C++ (>=1.1.3)
+- CMake Tools (>=1.5.3)
+- C++ TestMate (>=3.6.20)
 
+```
+sudo apt-get ninja cmake
+```
 
 # Cross compilation on non-PI platform (MacOS)
 

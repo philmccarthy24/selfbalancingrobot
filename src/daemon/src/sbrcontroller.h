@@ -22,7 +22,24 @@ namespace sbrcontroller {
             {
             }
         };
+
+        class ComsException : public std::runtime_error
+        {
+        public:
+            ComsException(const std::string& msg) : 
+                std::runtime_error(msg) 
+            {
+            }
+        };
+
+        class InvalidOperationException : public std::runtime_error
+        {
+        public:
+            InvalidOperationException(const std::string& msg) : 
+                std::runtime_error(msg) 
+            {
+            }
+        };
     }
-    
 
 }

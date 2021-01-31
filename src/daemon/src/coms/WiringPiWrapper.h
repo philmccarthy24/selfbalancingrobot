@@ -5,10 +5,10 @@
 namespace sbrcontroller {
     namespace coms {
 
-        class Pi4I2CDevice : public II2CDevice {
+        class WiringPiWrapper : public II2CDevice {
         public:
-            Pi4I2CDevice(int deviceId);
-            virtual ~Pi4I2CDevice();
+            WiringPiWrapper(int deviceId);
+            virtual ~WiringPiWrapper();
 
             virtual unsigned char ReadReg8(int register) override;
             virtual void WriteReg8(int register, unsigned char data) override;

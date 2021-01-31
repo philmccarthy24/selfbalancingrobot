@@ -1,5 +1,5 @@
 #include "JSONConfigProvider.h"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 #include <fstream>
 #include <streambuf>
 
@@ -25,7 +25,7 @@ namespace sbrcontroller {
             //configJson["/baz/1"] // supports jsonPointer syntax for querying
         }
 
-        std::vector<std::string> JSONConfigProvider::GetConfigValues(const std::string& configKey)
+        std::vector<std::string> JSONConfigProvider::GetConfigListValue(const std::string& configKey)
         {
             auto configJson = json::parse(m_cachedConfig);
             auto jArray = configJson[json::pointer(configKey)];

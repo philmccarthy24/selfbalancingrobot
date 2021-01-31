@@ -9,3 +9,4 @@ set(utility_files
   SBRProdFactory.cpp
 )
 add_library(utility ${utility_files})
+target_include_directories(utility PRIVATE ./ ../ ../ahrs ../ahrs/sensors ../ahrs/algorithms ../coms)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sensors.h"
 #include <utility>
 #include <string>
 #include <future>
@@ -41,54 +42,17 @@ namespace sbrcontroller
             virtual Ori3DRads ReadOrientation() = 0;
         };
 
-        enum ESensorType {
-            Gyroscope,
-            Accelerometer,
-            Magnetometor
-        };
-
-        struct SensorData
-        {
-            SensorData() {}
-            virtual ~SensorData() {}
-        };
-
-        struct Axis3DSensorData : public SensorData 
-        {
-            float x;
-            float y;
-            float z;
-        };
-
-        class ISensor
-        {
-        public:
-            ISensor() {}
-            virtual ~ISensor() {}
-            virtual ESensorType GetType() = 0;
-            virtual std::string GetDeviceInfo() = 0;
-            virtual SensorData GetData() = 0;
-        };
-
         class IAHRSFusionAlgorithm
         {
         public:
             IAHRSFusionAlgorithm() {}
             virtual ~IAHRSFusionAlgorithm() {}
             virtual bool IsHardwareImplementation() = 0;
-            virtual void Update(const Axis3DSensorData& gyroData, const Axis3DSensorData& accelData, const Axis3DSensorData& magData) = 0;
-            virtual void UpdateIMU(const Axis3DSensorData& gyroData, const Axis3DSensorData& accelData) = 0;
+            virtual void Update(const sensors::TripleAxisData& gyroData, const sensors::TripleAxisData& accelData, const sensors::TripleAxisData& magData) = 0;
+            virtual void UpdateIMU(const sensors::TripleAxisData& gyroData, const sensors::TripleAxisData& accelData) = 0;
 
             virtual std::future<Quarternion> ReadFusedSensorDataAsync() = 0;
         };
-
-        // In terms of design, there should be an AHRSController that has an internal thread,
-        // responsible for getting raw data from 6/9 dof sensors and fusing them via a
-        // particular algorithm to get orientation, and then asynchronously providing orientation 
-        // readings to onwards processing (via promises as a clean simple thread-shared data mech.)
-        // The AHRSController should manage 2 or 3 ISensors created via a factory (ie should
-        // abstract the calling interface). How to handle the common MPU6050 (or other) setup code?
-        
 
     }
 }

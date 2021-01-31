@@ -11,7 +11,7 @@ namespace sbrcontroller {
             virtual ~JSONConfigProvider();
 
             virtual std::string GetConfigValue(const std::string& configKey) override;
-            virtual std::vector<std::string> GetConfigValues(const std::string& configKey) override;
+            virtual std::vector<std::string> GetConfigListValue(const std::string& configKey) override;
             virtual void SetConfigValue(const std::string& configKey, const std::string& configValue) override;
 
         private:

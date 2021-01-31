@@ -11,6 +11,9 @@
 // 19/02/2012	SOH Madgwick	Magnetometer measurement is normalised
 // 23/01/2021   Phil McCarthy   Ported to C++
 //
+// Madgwick filter has superior accuracy and less computational overhead than a Kalman filter
+// when used with 9dof sensor
+//
 //=====================================================================================================
 #pragma once
 #include "AHRS.h"
@@ -26,8 +29,8 @@ namespace sbrcontroller {
                 ~Madgwick();
 
                 virtual bool IsHardwareImplementation() override;
-                virtual void Update(const Axis3DSensorData& gyroData, const Axis3DSensorData& accelData, const Axis3DSensorData& magData) override;
-                virtual void UpdateIMU(const Axis3DSensorData& gyroData, const Axis3DSensorData& accelData) override;
+                virtual void Update(const sensors::TripleAxisData& gyroData, const sensors::TripleAxisData& accelData, const sensors::TripleAxisData& magData) override;
+                virtual void UpdateIMU(const sensors::TripleAxisData& gyroData, const sensors::TripleAxisData& accelData) override;
 
                 virtual std::future<Quarternion> ReadFusedSensorDataAsync() override;
 

@@ -5,4 +5,4 @@ set(ahrs_sensors_source_files
   MPU6050Gyro.h
 )
 add_library(ahrs_sensors ${ahrs_sensors_source_files})
-target_include_directories(ahrs_sensors PRIVATE ../)
+target_include_directories(ahrs_sensors PRIVATE ../ ../../ ../../coms)
