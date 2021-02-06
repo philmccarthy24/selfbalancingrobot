@@ -2,25 +2,27 @@
 #include <memory>
 #include <unistd.h>
 #include "Register.h"
-#include "JSONConfigProvider.h"
+#include "JSONConfigSection.h"
 #include "SBRProdFactory.h"
 #include "AHRS.h"
+#include "spdlog/spdlog.h"
 
 using namespace std;
 using namespace sbrcontroller;
 
 int main()
 {
+    spdlog::info("Welcome to spdlog!");
     try {
         // production startup process
-        utility::Register::RegisterConfigProvider(make_shared<utility::JSONConfigProvider>("./sbrconfig.json"));
+        utility::Register::RegisterConfigProvider(make_shared<utility::JSONConfigSection>("./sbrconfig.json"));
         utility::Register::RegisterFactory(make_shared<utility::SBRProdFactory>());
         auto ahrsDataSource = utility::Register::Factory().CreateAHRSDataSource();
 
         for (int i = 0; i < 100; i++) {
             auto currOrientation = ahrsDataSource->ReadOrientation();
             cout << "X rotation " << currOrientation.GetRollInDegrees() << " degrees, Y rotation " << currOrientation.GetPitchInDegrees() << "degrees" << endl;
-            usleep(100 * 1000);
+            usleep(200 * 1000);
             // seem to be drifting quite a bit (+/- 1degree) even when still. is this
             // sensor noise?
             // https://wired.chillibasket.com/2015/01/calibrating-mpu6050/ has some stuff about

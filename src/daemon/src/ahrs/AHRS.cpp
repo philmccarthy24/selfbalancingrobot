@@ -8,7 +8,7 @@ namespace sbrcontroller
 
         float UnitConvertor::ToDegrees(float radians)
         {
-            return radians * (180.0 / M_PI);
+            return (radians * 180.0) / M_PI;
         }
 
         float UnitConvertor::ToRadians(float degrees)

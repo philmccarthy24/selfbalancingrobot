@@ -38,7 +38,7 @@ namespace sbrcontroller {
 
                 private:
                     std::shared_ptr<coms::II2CDevice> m_pMPU6050;
-                    float m_fRadiansPerSec;
+                    float m_fCountsPerDegreesPerSec;
 
                     // registers
                     static const int PWR_MGMT_1 = 0x6B;

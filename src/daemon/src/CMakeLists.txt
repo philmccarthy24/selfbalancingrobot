@@ -9,8 +9,6 @@ set(header_files
     ahrs/AHRSController.h
 )
 
-link_directories(${CODE_ROOT}/FancyLogger/bin)
-
 add_executable(sbrcontrollerd main.cpp ${header_files})
 
 set(sbr_includes
@@ -26,3 +24,10 @@ find_package(Threads REQUIRED)
 
 target_include_directories(sbrcontrollerd PRIVATE ${sbr_includes})
 target_link_libraries(sbrcontrollerd PRIVATE ahrs coms utility Threads::Threads)
+
+# copy default config file
+add_custom_command(
+        TARGET sbrcontrollerd POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_SOURCE_DIR}/sbrconfig.json
+                ${CMAKE_CURRENT_BINARY_DIR}/sbrconfig.json)

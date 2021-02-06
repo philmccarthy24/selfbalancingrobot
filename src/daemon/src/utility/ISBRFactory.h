@@ -2,6 +2,10 @@
 
 #include <memory>
 
+namespace spdlog {
+    class logger;
+}
+
 namespace sbrcontroller {
 
     namespace sensors {
@@ -35,6 +39,7 @@ namespace sbrcontroller {
             virtual std::shared_ptr<sbrcontroller::sensors::ISensor> CreateSensor(const std::string& config) const = 0;
 
             //... add more here. will need motor controller abstraction, logging, etc
+            virtual std::shared_ptr<spdlog::logger> CreateLogger(const std::string& className) const = 0;
         };
     }
 }

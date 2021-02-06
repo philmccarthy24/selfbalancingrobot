@@ -13,10 +13,10 @@ namespace sbrcontroller {
 
             // these are held as radian values
             const double MPU6050Gyro::GYRO_FS_COUNTS[] = {
-                (131 * M_PI) / 180, // range of gyroscope is +-250deg/s
-                (65.5 * M_PI) / 180, // range of gyroscope is +-500deg/s
-                (32.8 * M_PI) / 180, // range of gyroscope is +-1000deg/s
-                (16.4 * M_PI) / 180  // range of gyroscope is +-2000deg/s
+                131, // range of gyroscope is +-250deg/s
+                65.5, // range of gyroscope is +-500deg/s
+                32.8, // range of gyroscope is +-1000deg/s
+                16.4  // range of gyroscope is +-2000deg/s
             };
 
             MPU6050Gyro::MPU6050Gyro(std::shared_ptr<coms::II2CDevice> pI2CDevice) :
@@ -27,7 +27,7 @@ namespace sbrcontroller {
 
                 // GYRO_CONFIG register. FS_SEL is bits 3 and 4
                 int FS_SEL = (m_pMPU6050->ReadReg8(GYRO_CONFIG) >> 3) & 0x3;
-                m_fRadiansPerSec = GYRO_FS_COUNTS[FS_SEL];
+                m_fCountsPerDegreesPerSec = GYRO_FS_COUNTS[FS_SEL];
 
                 //... there's a way to do a calibration as well
                 // for both accel and gyro. Should we support this?
@@ -53,14 +53,14 @@ namespace sbrcontroller {
                     return 0;
 
                 // read raw counts from gyroscope. page 29 of [RegisterMap]
-                short gyXRawCounts = static_cast<short>(m_pMPU6050->ReadReg16(GYRO_XOUT_H));
-                short gyYRawCounts = static_cast<short>(m_pMPU6050->ReadReg16(GYRO_YOUT_H));
-                short gyZRawCounts = static_cast<short>(m_pMPU6050->ReadReg16(GYRO_ZOUT_H));
+                unsigned short gyXRawCounts = static_cast<unsigned short>(m_pMPU6050->ReadReg16(GYRO_XOUT_H));
+                unsigned short gyYRawCounts = static_cast<unsigned short>(m_pMPU6050->ReadReg16(GYRO_YOUT_H));
+                unsigned short gyZRawCounts = static_cast<unsigned short>(m_pMPU6050->ReadReg16(GYRO_ZOUT_H));
                 // convert to units
                 auto pData = reinterpret_cast<TripleAxisData*>(buffer);
-                pData->x = static_cast<float>(gyXRawCounts) / static_cast<float>(m_fRadiansPerSec);
-                pData->y = static_cast<float>(gyYRawCounts) / static_cast<float>(m_fRadiansPerSec);
-                pData->z = static_cast<float>(gyZRawCounts) / static_cast<float>(m_fRadiansPerSec);
+                pData->x = ((static_cast<float>(gyXRawCounts) * M_PI) / m_fCountsPerDegreesPerSec) / 180.0f;
+                pData->y = ((static_cast<float>(gyYRawCounts) * M_PI) / m_fCountsPerDegreesPerSec) / 180.0f;
+                pData->z = ((static_cast<float>(gyZRawCounts) * M_PI) / m_fCountsPerDegreesPerSec) / 180.0f;
                 
                 return sizeof(TripleAxisData);
             }

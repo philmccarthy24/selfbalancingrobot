@@ -44,6 +44,8 @@ namespace sbrcontroller {
         {
             TripleAxisData gyroDataRadsPerSec, accelDataGsPerSec, magDataGauss;
 
+            int sleepMS = 1000 / m_nSensorSamplePeriodHz;
+
             while (!m_bKillSignal) {
 
                 if (m_pGyroSensor->ReadSensorData(reinterpret_cast<unsigned char*>(&gyroDataRadsPerSec), sizeof(TripleAxisData)) != sizeof(TripleAxisData))
@@ -60,10 +62,9 @@ namespace sbrcontroller {
                 } else {
                     m_pFusionAlgorithm->UpdateIMU(gyroDataRadsPerSec, accelDataGsPerSec);
                 }
-
-                // we sample at 50Hz, so wait 20ms between readings. this won't be
-                // massively accurate unfortunately (TODO: add metrics)
-                std::this_thread::sleep_for(std::chrono::milliseconds(20));
+                
+                // this won't be massively accurate unfortunately (TODO: add metrics)
+                std::this_thread::sleep_for(std::chrono::milliseconds(sleepMS));
             }
         }
 

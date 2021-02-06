@@ -1,4 +1,4 @@
-include(FetchContent)
+include(FetchContent REQUIRED)
 
 #GIT_REPOSITORY https://github.com/nlohmann/json.git
 
@@ -12,10 +12,25 @@ if(NOT json_POPULATED)
   add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
+FetchContent_Declare(
+  spdlog
+  GIT_REPOSITORY https://github.com/gabime/spdlog.git
+  GIT_TAG        v1.8.2)
+
+FetchContent_GetProperties(spdlog)
+if(NOT spdlog_POPULATED)
+  message(STATUS "Populating spdlog")
+  FetchContent_Populate(spdlog)
+  # find_package(spdlog REQUIRED)
+  set(SPDLOG_BUILD_TESTS OFF CACHE INTERNAL "")
+  add_subdirectory(${spdlog_SOURCE_DIR} ${spdlog_BINARY_DIR} EXCLUDE_FROM_ALL)
+  set(SPDLOG_INCLUDE_DIR ${spdlog_SOURCE_DIR}/include)
+endif()
+
 set(utility_files
-  IConfigProvider.h
-  JSONConfigProvider.h
-  JSONConfigProvider.cpp
+  IConfigSection.h
+  JSONConfigSection.h
+  JSONConfigSection.cpp
   Register.h
   Register.cpp
   ISBRFactory.h
@@ -34,5 +49,5 @@ set(utility_includes
 ../coms
 )
 
-target_link_libraries(utility PRIVATE nlohmann_json::nlohmann_json coms ahrs)
+target_link_libraries(utility PRIVATE nlohmann_json::nlohmann_json coms ahrs spdlog)
 target_include_directories(utility PRIVATE ${utility_includes})

@@ -32,7 +32,7 @@ endif()
 
 # Now simply link against gtest or gtest_main as needed. Eg
 add_executable(sbrtests ExampleTest.cpp)
-target_link_libraries(sbrtests gtest gtest_main)
+target_link_libraries(sbrtests gtest gtest_main utility)
 
 include(CTest)
 include(GoogleTest)

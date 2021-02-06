@@ -4,7 +4,7 @@ namespace sbrcontroller {
     namespace utility {
 
         std::shared_ptr<ISBRFactory> Register::m_pFactory;
-        std::shared_ptr<IConfigProvider> Register::m_pConfig;
+        std::shared_ptr<IConfigSection> Register::m_pConfig;
 
         Register::Register()
         {
@@ -14,7 +14,7 @@ namespace sbrcontroller {
         {
         }
 
-        void Register::RegisterConfigProvider(std::shared_ptr<IConfigProvider> pConfigProvider)
+        void Register::RegisterConfigProvider(std::shared_ptr<IConfigSection> pConfigProvider)
         {
             std::swap(m_pConfig, pConfigProvider);
         }
@@ -29,7 +29,7 @@ namespace sbrcontroller {
             return *m_pFactory;
         }
         
-        IConfigProvider& Register::Config()
+        IConfigSection& Register::Config()
         {
             return *m_pConfig;
         }

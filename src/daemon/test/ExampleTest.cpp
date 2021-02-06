@@ -1,4 +1,5 @@
 #include <gtest/gtest.h> // googletest header file
+//#include "JSONConfigSection.cpp"
 
 TEST(Foo, Sum)
 {

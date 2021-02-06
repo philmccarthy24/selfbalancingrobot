@@ -36,7 +36,7 @@ namespace sbrcontroller {
         {
             int highByte = wiringPiI2CReadReg8(m_fdI2CDevice, i2creg);
             int lowByte = wiringPiI2CReadReg8(m_fdI2CDevice, i2creg + 1);
-            return (highByte << 8) | lowByte;
+            return static_cast<unsigned short>((highByte << 8) | lowByte);
         }
 
         void WiringPiWrapper::WriteReg16(int i2creg, unsigned short data)

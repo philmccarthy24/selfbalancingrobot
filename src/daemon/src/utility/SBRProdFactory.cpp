@@ -1,7 +1,7 @@
 #include "SBRProdFactory.h"
 #include "AHRSController.h"
 #include "Register.h"
-#include "IConfigProvider.h"
+#include "IConfigSection.h"
 #include "sbrcontroller.h"
 #include "sensors.h"
 #include "Madgwick.h"
@@ -9,6 +9,7 @@
 #include "MPU6050Gyro.h"
 #include "Pi4I2CDevice.h"
 #include "WiringPiWrapper.h"
+#include "spdlog/spdlog.h"
 #include <memory>
 
 using namespace sbrcontroller::sensors;
@@ -72,13 +73,20 @@ namespace sbrcontroller {
             if (config == "MPU6050_gyro") {
                 auto pI2CDevice = CreateI2CDevice(MPU6050_I2C_ADDR);
                 pSensor = std::make_shared<MPU6050Gyro>(pI2CDevice);
-            } else if (config == "MPU6050_gyro") {
+            } else if (config == "MPU6050_accel") {
                 auto pI2CDevice = CreateI2CDevice(MPU6050_I2C_ADDR);
                 pSensor = std::make_shared<MPU6050Accel>(pI2CDevice);
             } else {
                 throw errorhandling::NotImplementedException("Code does not yet exist to create sensor " + config + " specified.");
             }
             return pSensor;
+        }
+
+        std::shared_ptr<spdlog::logger> SBRProdFactory::CreateLogger(const std::string& className) const
+        {
+            if (m_pConfig == nullptr) {
+                throw errorhandling::InvalidOperationException("Initialise config before logging");
+            }
         }
     }
 }

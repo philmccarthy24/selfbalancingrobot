@@ -53,9 +53,9 @@ namespace sbrcontroller {
                     return 0;
 
                 // read raw counts from accelerometer and gyroscope. page 29 of [RegisterMap]
-                short accXRawCounts = static_cast<short>(m_pMPU6050->ReadReg16(ACCEL_XOUT_H));
-                short accYRawCounts = static_cast<short>(m_pMPU6050->ReadReg16(ACCEL_YOUT_H));
-                short accZRawCounts = static_cast<short>(m_pMPU6050->ReadReg16(ACCEL_ZOUT_H));
+                unsigned short accXRawCounts = static_cast<unsigned short>(m_pMPU6050->ReadReg16(ACCEL_XOUT_H));
+                unsigned short accYRawCounts = static_cast<unsigned short>(m_pMPU6050->ReadReg16(ACCEL_YOUT_H));
+                unsigned short accZRawCounts = static_cast<unsigned short>(m_pMPU6050->ReadReg16(ACCEL_ZOUT_H));
                 // convert to units
                 auto pData = reinterpret_cast<TripleAxisData*>(buffer);
                 pData->x = static_cast<float>(accXRawCounts) / static_cast<float>(m_nCountsPerG);
