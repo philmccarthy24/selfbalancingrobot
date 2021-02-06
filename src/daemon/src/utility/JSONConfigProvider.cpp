@@ -1,7 +1,12 @@
 #include "JSONConfigProvider.h"
+#include "sbrcontroller.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <streambuf>
+#include <vector>
+#include <string>
+
+using json = nlohmann::json;
 
 namespace sbrcontroller {
     namespace utility {
@@ -19,17 +24,45 @@ namespace sbrcontroller {
         {
         }
 
-        std::string JSONConfigProvider::GetConfigValue(const std::string& configKey)
+        std::string JSONConfigProvider::GetConfigValue(const std::string& configKey) const
         {
-            auto configJson = json::parse(m_cachedConfig);
-            //configJson["/baz/1"] // supports jsonPointer syntax for querying
+            std::string configValue;
+
+            try
+            {
+                auto jp = json::json_pointer(configKey);
+                auto configJson = json::parse(m_cachedConfig);
+                auto jStr = configJson[jp];
+                configValue = jStr.get<std::string>();
+            }
+            catch (json::parse_error& e)
+            {
+                throw errorhandling::ParseException("Error parsing config json");
+            }
+            return configValue;
         }
 
-        std::vector<std::string> JSONConfigProvider::GetConfigListValue(const std::string& configKey)
+        std::vector<std::string> JSONConfigProvider::GetConfigListValue(const std::string& configKey) const
         {
-            auto configJson = json::parse(m_cachedConfig);
-            auto jArray = configJson[json::pointer(configKey)];
-            
+            std::vector<std::string> listValue;
+            try
+            {
+                auto jp = json::json_pointer(configKey);
+                auto configJson = json::parse(m_cachedConfig);
+                auto jArray = configJson[jp];
+                if (!jArray.is_array())
+                {
+                    throw errorhandling::ParseException("Expected config entry " + configKey + " to be list");
+                }
+                for (auto& i : jArray) {
+                    listValue.push_back(i.get<std::string>());
+                }
+            }
+            catch (json::parse_error& e)
+            {
+                throw errorhandling::ParseException("Error parsing config json");
+            }
+            return listValue;
         }
 
         void JSONConfigProvider::SetConfigValue(const std::string& configKey, const std::string& configValue)

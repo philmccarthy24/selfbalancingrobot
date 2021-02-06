@@ -1,5 +1,6 @@
 #include "AHRSController.h"
 #include "AHRS.h"
+#include "IAHRSFusionAlgorithm.h"
 #include "sbrcontroller.h"
 #include "sensors.h"
 
@@ -9,7 +10,7 @@ using namespace std;
 namespace sbrcontroller {
     namespace ahrs {
 
-        AHRSController::AHRSController(std::shared_ptr<IAHRSFusionAlgorithm> fusionAlgorithm,
+        AHRSController::AHRSController(std::shared_ptr<algorithms::IAHRSFusionAlgorithm> fusionAlgorithm,
             const std::vector<std::shared_ptr<ISensor>>& sensors,
             int sensorSamplePeriodHz) :
                 m_pFusionAlgorithm(fusionAlgorithm),
@@ -60,11 +61,6 @@ namespace sbrcontroller {
                     m_pFusionAlgorithm->UpdateIMU(gyroDataRadsPerSec, accelDataGsPerSec);
                 }
 
-
-                
-                
-
-
                 // we sample at 50Hz, so wait 20ms between readings. this won't be
                 // massively accurate unfortunately (TODO: add metrics)
                 std::this_thread::sleep_for(std::chrono::milliseconds(20));
@@ -75,6 +71,7 @@ namespace sbrcontroller {
         {
             auto qfuture = m_pFusionAlgorithm->ReadFusedSensorDataAsync();
             auto q = qfuture.get(); // wait for the promise to be fulfilled
+            return q.ToEuler();
         }
     }
 }

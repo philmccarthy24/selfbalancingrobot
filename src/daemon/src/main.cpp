@@ -19,7 +19,7 @@ int main()
 
         for (int i = 0; i < 100; i++) {
             auto currOrientation = ahrsDataSource->ReadOrientation();
-            cout << "X rotation " << currOrientation. << " degrees, Y rotation " << currOrientation.m_dbPitch_deg << "degrees" << endl;
+            cout << "X rotation " << currOrientation.GetRollInDegrees() << " degrees, Y rotation " << currOrientation.GetPitchInDegrees() << "degrees" << endl;
             usleep(100 * 1000);
             // seem to be drifting quite a bit (+/- 1degree) even when still. is this
             // sensor noise?

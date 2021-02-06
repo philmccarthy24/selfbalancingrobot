@@ -1,5 +1,6 @@
 #pragma once
 #include "AHRS.h"
+#include "IAHRSFusionAlgorithm.h"
 #include <memory>
 #include <vector>
 #include <thread>
@@ -12,11 +13,14 @@ namespace sbrcontroller
 
     namespace ahrs
     {
+        namespace algorithms {
+            class IAHRSFusionAlgorithm;
+        }
 
         class AHRSController : public IAHRSDataSource
         {
         public:
-            AHRSController(std::shared_ptr<IAHRSFusionAlgorithm> fusionAlgorithm,
+            AHRSController(std::shared_ptr<algorithms::IAHRSFusionAlgorithm> fusionAlgorithm,
                 const std::vector<std::shared_ptr<sbrcontroller::sensors::ISensor>>& sensors,
                 int sensorSamplePeriodHz);
             virtual ~AHRSController();
@@ -28,7 +32,7 @@ namespace sbrcontroller
 
             std::thread m_tSensorFusionThread;
 
-            std::shared_ptr<IAHRSFusionAlgorithm> m_pFusionAlgorithm;
+            std::shared_ptr<algorithms::IAHRSFusionAlgorithm> m_pFusionAlgorithm;
             std::shared_ptr<sbrcontroller::sensors::ISensor> m_pGyroSensor; 
             std::shared_ptr<sbrcontroller::sensors::ISensor> m_pAccelSensor;
             std::shared_ptr<sbrcontroller::sensors::ISensor> m_pMagSensor;

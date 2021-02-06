@@ -15,7 +15,7 @@ namespace sbrcontroller {
             static void RegisterFactory(std::shared_ptr<ISBRFactory> pFactory);
             static void RegisterConfigProvider(std::shared_ptr<IConfigProvider> pConfigProvider);
             static const ISBRFactory& Factory();
-            static const IConfigProvider& Config();
+            static IConfigProvider& Config();
 
         private:
             Register();

@@ -42,17 +42,5 @@ namespace sbrcontroller
             virtual Ori3DRads ReadOrientation() = 0;
         };
 
-        class IAHRSFusionAlgorithm
-        {
-        public:
-            IAHRSFusionAlgorithm() {}
-            virtual ~IAHRSFusionAlgorithm() {}
-            virtual bool IsHardwareImplementation() = 0;
-            virtual void Update(const sensors::TripleAxisData& gyroData, const sensors::TripleAxisData& accelData, const sensors::TripleAxisData& magData) = 0;
-            virtual void UpdateIMU(const sensors::TripleAxisData& gyroData, const sensors::TripleAxisData& accelData) = 0;
-
-            virtual std::future<Quarternion> ReadFusedSensorDataAsync() = 0;
-        };
-
     }
 }

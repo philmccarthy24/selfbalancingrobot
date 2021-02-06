@@ -16,6 +16,7 @@
 //
 //=====================================================================================================
 #pragma once
+#include "IAHRSFusionAlgorithm.h"
 #include "AHRS.h"
 
 namespace sbrcontroller {

@@ -1,4 +1,5 @@
 set(ahrs_algorithms_source_files
+  IAHRSFusionAlgorithm.h
   Madgwick.cpp
   Madgwick.h
 )

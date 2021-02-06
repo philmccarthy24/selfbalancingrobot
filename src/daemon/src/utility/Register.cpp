@@ -29,7 +29,7 @@ namespace sbrcontroller {
             return *m_pFactory;
         }
         
-        const IConfigProvider& Register::Config()
+        IConfigProvider& Register::Config()
         {
             return *m_pConfig;
         }
