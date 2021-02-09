@@ -23,7 +23,7 @@ coms
 find_package(Threads REQUIRED)
 
 target_include_directories(sbrcontrollerd PRIVATE ${sbr_includes})
-target_link_libraries(sbrcontrollerd PRIVATE ahrs coms utility Threads::Threads)
+target_link_libraries(sbrcontrollerd PRIVATE ahrs coms utility Threads::Threads spdlog)
 
 # copy default config file
 add_custom_command(

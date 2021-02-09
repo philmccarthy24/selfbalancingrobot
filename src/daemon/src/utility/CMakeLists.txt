@@ -13,6 +13,27 @@ if(NOT json_POPULATED)
 endif()
 
 FetchContent_Declare(
+  fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG 7.1.3)
+
+  FetchContent_GetProperties(fmt)
+  if(NOT fmt_POPULATED)
+    message(STATUS "Populating fmt (Format)")
+    FetchContent_Populate(fmt)
+    set(FMT_BUILD_TESTS OFF CACHE INTERNAL "")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DFMT_HEADER_ONLY=1")
+    #file(COPY ${fmt_SOURCE_DIR}/include/fmt/core.h
+    #          ${fmt_SOURCE_DIR}/include/fmt/format-inl.h
+    #          ${fmt_SOURCE_DIR}/include/fmt/format.h
+    #     DESTINATION ${THIRD_PARTY_DIR}/fmt
+    #)
+    add_subdirectory(${fmt_SOURCE_DIR} ${fmt_BINARY_DIR} EXCLUDE_FROM_ALL)
+    set(FMT_INCLUDE_DIR ${fmt_SOURCE_DIR}/include)
+  endif()
+  
+
+FetchContent_Declare(
   spdlog
   GIT_REPOSITORY https://github.com/gabime/spdlog.git
   GIT_TAG        v1.8.2)
@@ -29,8 +50,11 @@ endif()
 
 set(utility_files
   IConfigSection.h
-  JSONConfigSection.h
-  JSONConfigSection.cpp
+  IConfigProvider.h
+  FileConfigProvider.h
+  FileConfigProvider.cpp
+  JSONConfig.h
+  JSONConfig.cpp
   Register.h
   Register.cpp
   ISBRFactory.h
@@ -49,5 +73,6 @@ set(utility_includes
 ../coms
 )
 
-target_link_libraries(utility PRIVATE nlohmann_json::nlohmann_json coms ahrs spdlog)
+target_link_libraries(utility PRIVATE nlohmann_json::nlohmann_json coms ahrs fmt::fmt spdlog)
+#target_link_libraries(utility INTERFACE fmt::fmt-header-only)
 target_include_directories(utility PRIVATE ${utility_includes})

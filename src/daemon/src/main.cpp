@@ -2,7 +2,8 @@
 #include <memory>
 #include <unistd.h>
 #include "Register.h"
-#include "JSONConfigSection.h"
+#include "FileConfigProvider.h"
+#include "JSONConfig.h"
 #include "SBRProdFactory.h"
 #include "AHRS.h"
 #include "spdlog/spdlog.h"
@@ -15,7 +16,10 @@ int main()
     spdlog::info("Welcome to spdlog!");
     try {
         // production startup process
-        utility::Register::RegisterConfigProvider(make_shared<utility::JSONConfigSection>("./sbrconfig.json"));
+        utility::Register::RegisterConfigProvider(
+            make_shared<utility::JSONConfig>(
+                make_shared<utility::FileConfigProvider>("./sbrconfig.json")
+        ));
         utility::Register::RegisterFactory(make_shared<utility::SBRProdFactory>());
         auto ahrsDataSource = utility::Register::Factory().CreateAHRSDataSource();
 

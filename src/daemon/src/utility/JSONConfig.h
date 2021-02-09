@@ -1,14 +1,16 @@
 #pragma once
 #include "IConfigSection.h"
+#include "IConfigProvider.h"
+#include <memory>
 
 namespace sbrcontroller {
     namespace utility {
 
-        class JSONConfigSection : public IConfigSection
+        class JSONConfig : public IConfigSection
         {
         public:
-            JSONConfigSection(const std::string& jsonFile, const std::string& rootPrefix = "/");
-            virtual ~JSONConfigSection();
+            JSONConfig(std::shared_ptr<IConfigProvider> configSource);
+            virtual ~JSONConfig();
 
             virtual std::string GetConfigValue(const std::string& configKey) const override;
             virtual std::vector<std::string> GetConfigListValue(const std::string& configKey) const override;
@@ -17,9 +19,7 @@ namespace sbrcontroller {
             virtual std::vector<std::shared_ptr<IConfigSection>> GetConfigSections(const std::string& configKey) const override;
 
         private:
-            std::string m_jsonFile;
-            std::string m_cachedConfig;
-            std::string m_rootPrefix;
+            std::shared_ptr<IConfigSection> m_pImpl;
         };
     }
 }

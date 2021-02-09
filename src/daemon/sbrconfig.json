@@ -8,22 +8,20 @@
         ]
     },
     "logging": {
-        "comment": "sinks types one of {stdout_color_sink_mt, stderr_color_sink_mt, basic_file_sink_mt, syslog_logger_sink_mt, rotating_logger_sink_mt, daily_logger_sink_mt}",
         "sinks": [
             {
                 "type": "stdout_color_sink_mt",
-                "defaultLevel": "trace"
+                "level": "trace"
             },
             {
-                "type": "rotating_logger_mt",
-                "maxSize": 1048576,
+                "type": "rotating_file_sink_mt",
+                "maxSize": 5169950,
                 "maxFiles": 3,
                 "logFileRoot": "logs/rotating.txt",
-                "defaultLevel": "trace",
-                "defaultPattern": "[%H:%M:%S %z] [%n] [%^---%L---%$] [thread %t] %v"
+                "level": "trace",
+                "pattern": "[%H:%M:%S %z] [%n] [%^---%L---%$] [thread %t] %v"
             }
         ],
-        "comment2": "loggers config let you override settings per logger instance",
         "loggers": [
             {
                 "name": "MPU6050Gyro",
