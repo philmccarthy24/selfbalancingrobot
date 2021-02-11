@@ -38,8 +38,7 @@ namespace sbrcontroller {
             virtual std::shared_ptr<ahrs::algorithms::IAHRSFusionAlgorithm> CreateFusionAlgorithm() const = 0;
             virtual std::shared_ptr<sbrcontroller::sensors::ISensor> CreateSensor(const std::string& config) const = 0;
 
-            //... add more here. will need motor controller abstraction, logging, etc
-            virtual std::shared_ptr<spdlog::logger> CreateLogger(const std::string& className) const = 0;
+            //... add more here. will need motor controller abstraction, etc
         };
     }
 }

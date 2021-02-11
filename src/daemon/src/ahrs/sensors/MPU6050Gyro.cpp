@@ -1,8 +1,8 @@
 #include "MPU6050Gyro.h"
 #include "II2CDevice.h"
 #include "AHRS.h"
+#include "spdlog/spdlog.h"
 #include <cmath>
-#include <stdexcept>
 
 using namespace std;
 using namespace sbrcontroller::sensors;
@@ -19,8 +19,9 @@ namespace sbrcontroller {
                 16.4  // range of gyroscope is +-2000deg/s
             };
 
-            MPU6050Gyro::MPU6050Gyro(std::shared_ptr<coms::II2CDevice> pI2CDevice) :
-                m_pMPU6050(pI2CDevice) 
+            MPU6050Gyro::MPU6050Gyro(std::shared_ptr<coms::II2CDevice> pI2CDevice, std::shared_ptr<spdlog::logger> pLogger) :
+                m_pMPU6050(pI2CDevice),
+                m_pLogger(pLogger)
             {
                 // disable sleep mode by setting PWR_MGMT_1 register to 0
                 m_pMPU6050->WriteReg8(PWR_MGMT_1, 0x00);
@@ -53,14 +54,16 @@ namespace sbrcontroller {
                     return 0;
 
                 // read raw counts from gyroscope. page 29 of [RegisterMap]
-                unsigned short gyXRawCounts = static_cast<unsigned short>(m_pMPU6050->ReadReg16(GYRO_XOUT_H));
-                unsigned short gyYRawCounts = static_cast<unsigned short>(m_pMPU6050->ReadReg16(GYRO_YOUT_H));
-                unsigned short gyZRawCounts = static_cast<unsigned short>(m_pMPU6050->ReadReg16(GYRO_ZOUT_H));
+                short gyXRawCounts = static_cast<short>(m_pMPU6050->ReadReg16(GYRO_XOUT_H));
+                short gyYRawCounts = static_cast<short>(m_pMPU6050->ReadReg16(GYRO_YOUT_H));
+                short gyZRawCounts = static_cast<short>(m_pMPU6050->ReadReg16(GYRO_ZOUT_H));
                 // convert to units
                 auto pData = reinterpret_cast<TripleAxisData*>(buffer);
                 pData->x = ((static_cast<float>(gyXRawCounts) * M_PI) / m_fCountsPerDegreesPerSec) / 180.0f;
                 pData->y = ((static_cast<float>(gyYRawCounts) * M_PI) / m_fCountsPerDegreesPerSec) / 180.0f;
                 pData->z = ((static_cast<float>(gyZRawCounts) * M_PI) / m_fCountsPerDegreesPerSec) / 180.0f;
+
+                m_pLogger->debug("x={:03.2f}, y={:03.2f}, z={:03.2f}", pData->x, pData->y, pData->z);
                 
                 return sizeof(TripleAxisData);
             }

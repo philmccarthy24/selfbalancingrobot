@@ -5,6 +5,7 @@
 #include "FileConfigProvider.h"
 #include "JSONConfig.h"
 #include "SBRProdFactory.h"
+#include "LoggerFactory.h"
 #include "AHRS.h"
 #include "spdlog/spdlog.h"
 
@@ -13,19 +14,24 @@ using namespace sbrcontroller;
 
 int main()
 {
-    spdlog::info("Welcome to spdlog!");
     try {
         // production startup process
         utility::Register::RegisterConfigProvider(
             make_shared<utility::JSONConfig>(
                 make_shared<utility::FileConfigProvider>("./sbrconfig.json")
         ));
-        utility::Register::RegisterFactory(make_shared<utility::SBRProdFactory>());
+        auto pLoggerFactory = make_shared<utility::LoggerFactory>();
+        auto pFactory = make_shared<utility::SBRProdFactory>();
+        utility::Register::RegisterLoggerFactory(pLoggerFactory);
+        utility::Register::RegisterFactory(pFactory);
+        auto logger = pLoggerFactory->CreateLogger("RootLogger");
+        logger->info("SBRController running!");
+
         auto ahrsDataSource = utility::Register::Factory().CreateAHRSDataSource();
 
         for (int i = 0; i < 100; i++) {
             auto currOrientation = ahrsDataSource->ReadOrientation();
-            cout << "X rotation " << currOrientation.GetRollInDegrees() << " degrees, Y rotation " << currOrientation.GetPitchInDegrees() << "degrees" << endl;
+            logger->debug("X rotation {} degrees, Y rotation {} degrees", currOrientation.GetRollInDegrees(), currOrientation.GetPitchInDegrees());
             usleep(200 * 1000);
             // seem to be drifting quite a bit (+/- 1degree) even when still. is this
             // sensor noise?

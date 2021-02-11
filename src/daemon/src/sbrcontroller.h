@@ -5,11 +5,13 @@
 namespace sbrcontroller {
 
     // config keys
-    static const std::string AHRS_FUSION_ALGORITHM_CONFIG_KEY = "ahrs/fusionAlgorithm";
-    static const std::string AHRS_SENSOR_SAMPLE_RATE_CONFIG_KEY = "ahrs/sensorSampleRateHz";
-    static const std::string AHRS_SENSOR_IDS_KEY = "ahrs/sensors";
-    static const std::string LOGGING_SINKS_KEY = "logging/sinks";
-    static const std::string LOGGING_LOGGERS_KEY = "logging/loggers";
+    static const std::string AHRS_FUSION_ALGORITHM_CONFIG_KEY = "/ahrs/fusionAlgorithm";
+    static const std::string AHRS_SENSOR_SAMPLE_RATE_CONFIG_KEY = "/ahrs/sensorSampleRateHz";
+    static const std::string AHRS_SENSOR_IDS_KEY = "/ahrs/sensors";
+    static const std::string LOGGING_LEVEL_KEY = "/logging/level";
+    static const std::string LOGGING_PATTERN_KEY = "/logging/pattern";
+    static const std::string LOGGING_SINKS_KEY = "/logging/sinks";
+    static const std::string LOGGING_LOGGERS_KEY = "/logging/loggers";
 
     // engineering constants
     static const int MPU6050_I2C_ADDR = 0x68;

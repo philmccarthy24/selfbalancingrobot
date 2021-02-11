@@ -18,7 +18,7 @@ namespace sbrcontroller {
          * 
          * Inner JSONConfigImpl implementation class
          */
-        class JSONConfigImpl : public IConfigSection, std::enable_shared_from_this<JSONConfigImpl>
+        class JSONConfigImpl : public IConfigSection, public std::enable_shared_from_this<JSONConfigImpl>
         {
         public:
             JSONConfigImpl(std::shared_ptr<IConfigProvider> configSource) :

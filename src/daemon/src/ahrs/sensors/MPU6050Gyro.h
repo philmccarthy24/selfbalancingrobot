@@ -1,6 +1,11 @@
 #pragma once
 #include "AHRS.h"
 #include "sensors.h"
+#include <memory>
+
+namespace spdlog {
+    class logger;
+}
 
 namespace sbrcontroller {
 
@@ -30,7 +35,7 @@ namespace sbrcontroller {
             class MPU6050Gyro : public sbrcontroller::sensors::ISensor 
             {
                 public:
-                    MPU6050Gyro(std::shared_ptr<coms::II2CDevice> pI2CDevice);
+                    MPU6050Gyro(std::shared_ptr<coms::II2CDevice> pI2CDevice, std::shared_ptr<spdlog::logger> pLogger);
                     virtual ~MPU6050Gyro();
 
                     virtual sbrcontroller::sensors::SensorInfo GetDeviceInfo() override;
@@ -39,6 +44,7 @@ namespace sbrcontroller {
                 private:
                     std::shared_ptr<coms::II2CDevice> m_pMPU6050;
                     float m_fCountsPerDegreesPerSec;
+                    std::shared_ptr<spdlog::logger> m_pLogger;
 
                     // registers
                     static const int PWR_MGMT_1 = 0x6B;

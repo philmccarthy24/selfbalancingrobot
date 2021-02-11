@@ -6,3 +6,4 @@ set(ahrs_sensors_source_files
 )
 add_library(ahrs_sensors ${ahrs_sensors_source_files})
 target_include_directories(ahrs_sensors PRIVATE ../ ../../ ../../coms)
+target_link_libraries(ahrs_sensors PRIVATE spdlog)

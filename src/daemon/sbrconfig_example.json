@@ -13,11 +13,22 @@
         "sinks": [
             {
                 "type": "stdout_color_sink_mt"
+            },
+            {
+                "type": "rotating_file_sink_mt",
+                "maxSize": 5169950,
+                "maxFiles": 3,
+                "logFileRoot": "logs/rotating.txt"
             }
         ],
         "loggers": [
             {
                 "name": "RootLogger",
+                "level": "debug",
+                "pattern": "%+"
+            },
+            {
+                "name": "MPU6050Gyro",
                 "level": "debug",
                 "pattern": "%+"
             }

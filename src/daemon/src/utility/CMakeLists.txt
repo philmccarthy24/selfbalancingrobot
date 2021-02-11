@@ -22,12 +22,6 @@ FetchContent_Declare(
     message(STATUS "Populating fmt (Format)")
     FetchContent_Populate(fmt)
     set(FMT_BUILD_TESTS OFF CACHE INTERNAL "")
-    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DFMT_HEADER_ONLY=1")
-    #file(COPY ${fmt_SOURCE_DIR}/include/fmt/core.h
-    #          ${fmt_SOURCE_DIR}/include/fmt/format-inl.h
-    #          ${fmt_SOURCE_DIR}/include/fmt/format.h
-    #     DESTINATION ${THIRD_PARTY_DIR}/fmt
-    #)
     add_subdirectory(${fmt_SOURCE_DIR} ${fmt_BINARY_DIR} EXCLUDE_FROM_ALL)
     set(FMT_INCLUDE_DIR ${fmt_SOURCE_DIR}/include)
   endif()
@@ -60,6 +54,9 @@ set(utility_files
   ISBRFactory.h
   SBRProdFactory.h
   SBRProdFactory.cpp
+  ILoggerFactory.h
+  LoggerFactory.h
+  LoggerFactory.cpp
 )
 
 add_library(utility ${utility_files})
