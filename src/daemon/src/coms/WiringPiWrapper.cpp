@@ -1,3 +1,5 @@
+#ifdef USING_WIRING_PI
+
 #include "WiringPiWrapper.h"
 #include "sbrcontroller.h"
 #include "wiringPiI2C.h"
@@ -34,9 +36,9 @@ namespace sbrcontroller {
         // TODO: understand how this compares to reading a reg16.
         unsigned short WiringPiWrapper::ReadReg16(int i2creg)
         {
-            int highByte = wiringPiI2CReadReg8(m_fdI2CDevice, i2creg);
-            int lowByte = wiringPiI2CReadReg8(m_fdI2CDevice, i2creg + 1);
-            return static_cast<unsigned short>((highByte << 8) | lowByte);
+            unsigned short reg16ns = static_cast<unsigned short>(wiringPiI2CReadReg16(m_fdI2CDevice, i2creg));
+            unsigned short reg16 = ((reg16ns << 8) | (reg16ns >> 8)); // reverse the bytes
+            return reg16;
         }
 
         void WiringPiWrapper::WriteReg16(int i2creg, unsigned short data)
@@ -56,3 +58,5 @@ namespace sbrcontroller {
 
     }
 }
+
+#endif

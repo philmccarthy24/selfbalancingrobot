@@ -21,9 +21,9 @@ namespace sbrcontroller
             float roll;
             float pitch;
             float yaw;
-            float GetRollInDegrees();
-            float GetPitchInDegrees();
-            float GetYawInDegrees();
+            float GetRollInDegrees() const;
+            float GetPitchInDegrees() const;
+            float GetYawInDegrees() const;
         };
 
         struct Quarternion {

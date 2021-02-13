@@ -3,6 +3,7 @@
 #include "IAHRSFusionAlgorithm.h"
 #include "sbrcontroller.h"
 #include "sensors.h"
+#include "spdlog/spdlog.h"
 
 using namespace sbrcontroller::sensors;
 using namespace std;
@@ -12,9 +13,11 @@ namespace sbrcontroller {
 
         AHRSController::AHRSController(std::shared_ptr<algorithms::IAHRSFusionAlgorithm> fusionAlgorithm,
             const std::vector<std::shared_ptr<ISensor>>& sensors,
-            int sensorSamplePeriodHz) :
+            int sensorSamplePeriodHz,
+            std::shared_ptr<spdlog::logger> pLogger) :
                 m_pFusionAlgorithm(fusionAlgorithm),
                 m_nSensorSamplePeriodHz(sensorSamplePeriodHz),
+                m_pLogger(pLogger),
                 m_bKillSignal(false)
         {
             for (auto&& sensor : sensors) {
@@ -45,6 +48,7 @@ namespace sbrcontroller {
             TripleAxisData gyroDataRadsPerSec, accelDataGsPerSec, magDataGauss;
 
             int sleepMS = 1000 / m_nSensorSamplePeriodHz;
+            m_pLogger->info("Starting ahrs sampling at {}Hz ({} ms sleeps)", m_nSensorSamplePeriodHz, sleepMS);
 
             while (!m_bKillSignal) {
 

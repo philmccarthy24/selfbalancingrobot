@@ -8,7 +8,6 @@
 #include "MPU6050Accel.h"
 #include "MPU6050Gyro.h"
 #include "Pi4I2CDevice.h"
-#include "WiringPiWrapper.h"
 #include "ILoggerFactory.h"
 
 using namespace sbrcontroller::sensors;
@@ -30,7 +29,7 @@ namespace sbrcontroller {
         
         std::shared_ptr<II2CDevice> SBRProdFactory::CreateI2CDevice(int deviceId) const
         {
-            return std::make_shared<WiringPiWrapper>(deviceId);
+            return std::make_shared<Pi4I2CDevice>(deviceId);
         }
 
         std::shared_ptr<ahrs::IAHRSDataSource> SBRProdFactory::CreateAHRSDataSource() const
@@ -45,7 +44,8 @@ namespace sbrcontroller {
             }
 
             int sensorSamplePeriodHz = std::stoi(Register::Config().GetConfigValue(AHRS_SENSOR_SAMPLE_RATE_CONFIG_KEY));
-            return std::make_shared<ahrs::AHRSController>(fusionAlgorithm, sensors, sensorSamplePeriodHz);
+            auto pLogger = Register::LoggerFactory().CreateLogger("AHRSController");
+            return std::make_shared<ahrs::AHRSController>(fusionAlgorithm, sensors, sensorSamplePeriodHz, pLogger);
         }
 
         std::shared_ptr<ahrs::algorithms::IAHRSFusionAlgorithm> SBRProdFactory::CreateFusionAlgorithm() const

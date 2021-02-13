@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef USING_WIRING_PI
+
 #include "II2CDevice.h"
 
 namespace sbrcontroller {
@@ -24,3 +26,4 @@ namespace sbrcontroller {
         };
     }
 }
+#endif

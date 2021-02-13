@@ -2,13 +2,16 @@
 
 ## I2C setup
 
-WiringPi 2.5 comes with Raspbian Buster on Pi4.
-As per http://wiringpi.com/reference/i2c-library/ the i2c drivers need to be installed into the kernel:
-
+The i2c drivers need to be installed into the kernel:
 ```
 sudo raspi-config
 ```
-Then enable the i2c module via interfaces menu, and reboot.
+enable the i2c module via interfaces menu, and reboot.
+
+Then the i2c dev lib headers need to be installed:
+```
+sudo apt-get install libi2c-dev
+```
 
 ## VSCode setup
 

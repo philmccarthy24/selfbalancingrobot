@@ -11,7 +11,7 @@ namespace sbrcontroller {
             virtual ~FileConfigProvider();
 
             virtual std::string GetConfig() const override;
-            virtual void StoreConfig(const std::string& serialisedConfig) const override;
+            virtual void StoreConfig(const std::string& serialisedConfig) override;
 
         private:
             std::string m_filePath;

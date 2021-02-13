@@ -17,9 +17,9 @@ namespace sbrcontroller {
         {
         }
 
-        void Register::RegisterConfigProvider(std::shared_ptr<IConfigSection> pConfigProvider)
+        void Register::RegisterConfigService(std::shared_ptr<IConfigSection> pConfigService)
         {
-            std::swap(m_pConfig, pConfigProvider);
+            std::swap(m_pConfig, pConfigService);
         }
 
         void Register::RegisterFactory(std::shared_ptr<ISBRFactory> pFactory)

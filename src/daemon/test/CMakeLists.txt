@@ -31,8 +31,22 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 
 # Now simply link against gtest or gtest_main as needed. Eg
-add_executable(sbrtests ExampleTest.cpp)
-target_link_libraries(sbrtests gtest gtest_main utility)
+add_executable(sbrtests ExampleTest.cpp AHRSPerformanceTests.cpp MemoryConfigProvider.h)
+
+set(test_includes
+./
+../src
+../src/ahrs
+../src/ahrs/algorithms
+../src/ahrs/sensors
+../src/utility
+../src/coms
+)
+
+find_package(Threads REQUIRED)
+
+target_include_directories(sbrtests PRIVATE ${test_includes})
+target_link_libraries(sbrtests gtest gtest_main utility spdlog Threads::Threads)
 
 include(CTest)
 include(GoogleTest)

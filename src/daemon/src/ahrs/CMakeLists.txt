@@ -7,7 +7,7 @@ set(ahrs_source_files
 add_subdirectory(algorithms)
 add_subdirectory(sensors)
 add_library(ahrs ${ahrs_source_files})
-target_link_libraries(ahrs PRIVATE ahrs_algorithms ahrs_sensors)
+target_link_libraries(ahrs PRIVATE ahrs_algorithms ahrs_sensors spdlog)
 
 set(ahrs_includes
 algorithms

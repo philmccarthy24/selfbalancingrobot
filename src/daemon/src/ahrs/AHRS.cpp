@@ -16,17 +16,17 @@ namespace sbrcontroller
             return (degrees * M_PI) / 180;
         }
 
-        float Ori3DRads::GetRollInDegrees()
+        float Ori3DRads::GetRollInDegrees() const
         {
             return UnitConvertor::ToDegrees(roll);
         }
 
-        float Ori3DRads::GetPitchInDegrees()
+        float Ori3DRads::GetPitchInDegrees() const
         {
             return UnitConvertor::ToDegrees(pitch);
         }
             
-        float Ori3DRads::GetYawInDegrees()
+        float Ori3DRads::GetYawInDegrees() const
         {
             return UnitConvertor::ToDegrees(yaw);
         }

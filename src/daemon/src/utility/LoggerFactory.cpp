@@ -20,6 +20,9 @@ namespace sbrcontroller {
                 // register async logger thread pool - do this once only
                 spdlog::init_thread_pool(8192, 2);
 
+                // flush loggers every 3 secs
+                spdlog::flush_every(std::chrono::seconds(3));
+
                 // create the logging sinks
                 auto& config = Register::Config();
                 auto sinksConfig = config.GetConfigSections(LOGGING_SINKS_KEY);

@@ -21,7 +21,7 @@ namespace sbrcontroller {
                  std::istreambuf_iterator<char>());
         }
         
-        void FileConfigProvider::StoreConfig(const std::string& serialisedConfig) const
+        void FileConfigProvider::StoreConfig(const std::string& serialisedConfig)
         {
             std::ofstream ofs(m_filePath);
             ofs << serialisedConfig;
