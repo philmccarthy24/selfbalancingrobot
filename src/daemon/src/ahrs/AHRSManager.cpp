@@ -1,4 +1,4 @@
-#include "AHRSController.h"
+#include "AHRSManager.h"
 #include "AHRS.h"
 #include "IAHRSFusionAlgorithm.h"
 #include "sbrcontroller.h"
@@ -11,14 +11,14 @@ using namespace std;
 namespace sbrcontroller {
     namespace ahrs {
 
-        AHRSController::AHRSController(std::shared_ptr<algorithms::IAHRSFusionAlgorithm> fusionAlgorithm,
+        AHRSManager::AHRSManager(std::shared_ptr<algorithms::IAHRSFusionAlgorithm> fusionAlgorithm,
             const std::vector<std::shared_ptr<ISensor>>& sensors,
             int sensorSamplePeriodHz,
             std::shared_ptr<spdlog::logger> pLogger) :
                 m_pFusionAlgorithm(fusionAlgorithm),
                 m_nSensorSamplePeriodHz(sensorSamplePeriodHz),
                 m_pLogger(pLogger),
-                m_bKillSignal(false)
+                m_bKillSignal(ATOMIC_VAR_INIT(false))
         {
             for (auto&& sensor : sensors) {
                 auto sensorInfo = sensor->GetDeviceInfo();
@@ -37,20 +37,21 @@ namespace sbrcontroller {
             m_tSensorFusionThread = std::thread([this] {SensorFusionThreadProc();});
         }
 
-        AHRSController::~AHRSController()
+        AHRSManager::~AHRSManager()
         {
-            m_bKillSignal = true;
+            m_bKillSignal.store(true);
             m_tSensorFusionThread.join();
         }
 
-        void AHRSController::SensorFusionThreadProc()
+        void AHRSManager::SensorFusionThreadProc()
         {
             TripleAxisData gyroDataRadsPerSec, accelDataGsPerSec, magDataGauss;
 
             int sleepMS = 1000 / m_nSensorSamplePeriodHz;
             m_pLogger->info("Starting ahrs sampling at {}Hz ({} ms sleeps)", m_nSensorSamplePeriodHz, sleepMS);
 
-            while (!m_bKillSignal) {
+            while (!m_bKillSignal.load()) 
+            {
 
                 if (m_pGyroSensor->ReadSensorData(reinterpret_cast<unsigned char*>(&gyroDataRadsPerSec), sizeof(TripleAxisData)) != sizeof(TripleAxisData))
                         throw errorhandling::InvalidOperationException("Could not read gyro data");
@@ -72,7 +73,7 @@ namespace sbrcontroller {
             }
         }
 
-        Ori3DRads AHRSController::ReadOrientation()
+        Ori3DRads AHRSManager::ReadOrientation()
         {
             auto qfuture = m_pFusionAlgorithm->ReadFusedSensorDataAsync();
             auto q = qfuture.get(); // wait for the promise to be fulfilled

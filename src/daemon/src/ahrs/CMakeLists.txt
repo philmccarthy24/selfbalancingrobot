@@ -1,8 +1,8 @@
 set(ahrs_source_files
   AHRS.cpp
   AHRS.h
-  AHRSController.cpp
-  AHRSController.h
+  AHRSManager.cpp
+  AHRSManager.h
 )
 add_subdirectory(algorithms)
 add_subdirectory(sensors)

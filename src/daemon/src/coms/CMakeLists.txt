@@ -1,9 +1,12 @@
 set(coms_files
   II2CDevice.h
-  Pi4I2CDevice.h
-  Pi4I2CDevice.cpp
+  LinuxI2CDevice.h
+  LinuxI2CDevice.cpp
   WiringPiWrapper.h
   WiringPiWrapper.cpp
+  ISerialDevice.h
+  LinuxSerialDevice.h
+  LinuxSerialDevice.cpp
 )
 
 add_library(coms ${coms_files})
@@ -12,9 +15,9 @@ set(coms_includes
   ../
 )
 
-#find_library(wiringPi_LIB wiringPi)
-#${wiringPi_LIB}
-#find_library(i2c_LIB i2c)
+# Put back in and remove line below if need to move back to wrappers
+# find_library(wiringPi_LIB wiringPi)
+# target_link_libraries(coms PRIVATE ${wiringPi_LIB})
 
-target_link_libraries(coms PRIVATE i2c)
+target_link_libraries(coms PRIVATE i2c fmt::fmt)
 target_include_directories(coms PRIVATE ${coms_includes})

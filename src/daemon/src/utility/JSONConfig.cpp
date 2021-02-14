@@ -106,7 +106,7 @@ namespace sbrcontroller {
                     }
                 } else if (configSectionsJSON.is_object()) {
                     // note we need to do a const_pointer_cast because this method is const, so the this ptr is const.
-                    auto configSection = std::make_shared<JSONObjectPointer>(std::const_pointer_cast<JSONConfigImpl>(shared_from_this()), configKey);
+                    auto configSection = std::make_shared<JSONObjectPointer>(std::const_pointer_cast<JSONConfigImpl>(shared_from_this()), configKey + "/");
                     configSections.push_back(std::dynamic_pointer_cast<IConfigSection>(configSection));
                 } else {
                     throw errorhandling::ParseException("Expected config section(s) to be array or single object");

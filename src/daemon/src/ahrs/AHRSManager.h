@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <thread>
+#include <atomic>
 
 namespace spdlog {
     class logger;
@@ -21,14 +22,14 @@ namespace sbrcontroller
             class IAHRSFusionAlgorithm;
         }
 
-        class AHRSController : public IAHRSDataSource
+        class AHRSManager : public IAHRSDataSource
         {
         public:
-            AHRSController(std::shared_ptr<algorithms::IAHRSFusionAlgorithm> fusionAlgorithm,
+            AHRSManager(std::shared_ptr<algorithms::IAHRSFusionAlgorithm> fusionAlgorithm,
                 const std::vector<std::shared_ptr<sbrcontroller::sensors::ISensor>>& sensors,
                 int sensorSamplePeriodHz,
                 std::shared_ptr<spdlog::logger> pLogger);
-            virtual ~AHRSController();
+            virtual ~AHRSManager();
 
             virtual Ori3DRads ReadOrientation() override;
 
@@ -42,7 +43,7 @@ namespace sbrcontroller
             std::shared_ptr<sbrcontroller::sensors::ISensor> m_pAccelSensor;
             std::shared_ptr<sbrcontroller::sensors::ISensor> m_pMagSensor;
             int m_nSensorSamplePeriodHz;
-            volatile bool m_bKillSignal;
+            std::atomic_bool m_bKillSignal;
 
             std::shared_ptr<spdlog::logger> m_pLogger;
         };

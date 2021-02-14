@@ -7,6 +7,23 @@
             "MPU6050_accel"
         ]
     },
+    "motorControl": {
+        "coms": {
+            "type": "serial",
+            "serialPort": "/dev/ttyACM0",
+            "baud": 115200
+        },
+        "motors": [
+            {
+                "name": "right",
+                "id": 0
+            },
+            {
+                "name": "left",
+                "id": 1
+            }
+        ]
+    },
     "logging": {
         "level": "info",
         "pattern": "%+",

@@ -58,20 +58,20 @@ protected:
 /*
 [2021-02-13 09:28:26.749] [RootLogger] [info] SBRController running!
 [2021-02-13 09:28:26.757] [RootLogger] [debug] Collecting performance data for 100 ahrs samples
-[2021-02-13 09:28:26.757] [AHRSController] [info] Starting ahrs sampling at 20Hz (50 ms sleeps)
+[2021-02-13 09:28:26.757] [AHRSManager] [info] Starting ahrs sampling at 20Hz (50 ms sleeps)
 [2021-02-13 09:29:00.719] [RootLogger] [debug] Stationary ahrs analysis for 100 samples - collection took 34.0s (should be 30s):
 [2021-02-13 09:29:00.719] [RootLogger] [debug] roll mean=-0.51567, sd=1.36835, minerr=-0.89974, maxerr=5.63310
 [2021-02-13 09:29:00.719] [RootLogger] [debug] pitch mean=-19.06574, sd=2.90817, minerr=-1.30235, maxerr=18.46657
 [2021-02-13 09:29:00.720] [RootLogger] [debug] yaw mean=43.54378, sd=26.19835, minerr=-43.53138, maxerr=44.58223
 
-[2021-02-13 11:56:46.532] [AHRSController] [info] Starting ahrs sampling at 20Hz (50 ms sleeps)
+[2021-02-13 11:56:46.532] [AHRSManager] [info] Starting ahrs sampling at 20Hz (50 ms sleeps)
 [2021-02-13 11:57:20.616] [RestingSensorVarianceTest_mpu6050raw_madgwick] [info] Stationary ahrs analysis for 100 samples - collection took 34.1s (should be 30s):
 [2021-02-13 11:57:20.617] [RestingSensorVarianceTest_mpu6050raw_madgwick] [info] roll mean=1.16603, sd=1.45603, minerr=-1.28715, maxerr=5.78910
 [2021-02-13 11:57:20.617] [RestingSensorVarianceTest_mpu6050raw_madgwick] [info] pitch mean=-22.88082, sd=3.78553, minerr=-1.57132, maxerr=22.29497
 [2021-02-13 11:57:20.617] [RestingSensorVarianceTest_mpu6050raw_madgwick] [info] yaw mean=50.78345, sd=30.97587, minerr=-50.81097, maxerr=53.07627
 
 // after propping sensor board up a bit
-[2021-02-13 11:59:44.904] [AHRSController] [info] Starting ahrs sampling at 20Hz (50 ms sleeps)
+[2021-02-13 11:59:44.904] [AHRSManager] [info] Starting ahrs sampling at 20Hz (50 ms sleeps)
 [2021-02-13 12:00:18.972] [RestingSensorVarianceTest_mpu6050raw_madgwick] [info] Stationary ahrs analysis for 100 samples - collection took 34.1s (should be 30s):
 [2021-02-13 12:00:18.972] [RestingSensorVarianceTest_mpu6050raw_madgwick] [info] roll mean=1.84588, sd=0.30032, minerr=-1.30037, maxerr=1.28994
 [2021-02-13 12:00:18.972] [RestingSensorVarianceTest_mpu6050raw_madgwick] [info] pitch mean=-7.97744, sd=0.89914, minerr=-0.84855, maxerr=7.39090

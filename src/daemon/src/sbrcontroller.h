@@ -12,6 +12,7 @@ namespace sbrcontroller {
     static const std::string LOGGING_PATTERN_KEY = "/logging/pattern";
     static const std::string LOGGING_SINKS_KEY = "/logging/sinks";
     static const std::string LOGGING_LOGGERS_KEY = "/logging/loggers";
+    static const std::string MOTOR_CONTROL_COMS_KEY = "/motorControl/coms";
 
     // engineering constants
     static const int MPU6050_I2C_ADDR = 0x68;
@@ -49,6 +50,15 @@ namespace sbrcontroller {
         {
         public:
             ParseException(const std::string& msg) : 
+                std::runtime_error(msg) 
+            {
+            }
+        };
+
+        class ConfigurationException : public std::runtime_error
+        {
+        public:
+            ConfigurationException(const std::string& msg) : 
                 std::runtime_error(msg) 
             {
             }

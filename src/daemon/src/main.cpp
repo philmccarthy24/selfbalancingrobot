@@ -13,6 +13,10 @@
 #include <numeric>
 #include <chrono>
 
+//## TODO DEBUGGING, Remove
+#include "sbrcontroller.h"
+#include "LinuxSerialDevice.h"
+
 using namespace std;
 using namespace sbrcontroller;
 
@@ -36,6 +40,21 @@ int main()
             logger->info("SBRController running!");
 
             // more setup code here... TODO
+
+            auto configSections = utility::Register::Config().GetConfigSections(MOTOR_CONTROL_COMS_KEY);
+            if (configSections.size() != 1)
+                throw errorhandling::ConfigurationException("Expecting a single motor control coms section");
+            auto configSection = configSections[0];
+            if (configSection->GetConfigValue("type") == "serial") {
+                auto serialPort = configSection->GetConfigValue("serialPort");
+                int baudRate = std::stoi(configSection->GetConfigValue("baud"));
+                auto pSerial = make_shared<coms::LinuxSerialDevice>(serialPort, baudRate);
+            }
+
+            printf("Press Return to quit\n");  
+            getchar();
+            
+            
         }
         catch (const std::exception& ex) {
             logger->error(ex.what());

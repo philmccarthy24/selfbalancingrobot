@@ -1,4 +1,4 @@
-#include "Pi4I2CDevice.h"
+#include "LinuxI2CDevice.h"
 #include "sbrcontroller.h"
 // headers required for RPi Buster i2c use
 //https://www.kernel.org/doc/Documentation/i2c/dev-interface
@@ -13,7 +13,7 @@ extern "C" {
 namespace sbrcontroller {
     namespace coms {
 
-        Pi4I2CDevice::Pi4I2CDevice(int deviceId) :
+        LinuxI2CDevice::LinuxI2CDevice(int deviceId) :
             II2CDevice(deviceId)
         {
             // RAII pattern: open device, if we can't, throw exception 
@@ -29,40 +29,40 @@ namespace sbrcontroller {
             }
         }
 
-        Pi4I2CDevice::~Pi4I2CDevice()
+        LinuxI2CDevice::~LinuxI2CDevice()
         {
             if (m_fdI2CDevice != -1) {
                 close(m_fdI2CDevice);
             }
         }
 
-        unsigned char Pi4I2CDevice::ReadReg8(int i2creg)
+        unsigned char LinuxI2CDevice::ReadReg8(int i2creg)
         {
             return i2c_smbus_read_byte_data(m_fdI2CDevice, i2creg);
         }
 
-        void Pi4I2CDevice::WriteReg8(int i2creg, unsigned char data)
+        void LinuxI2CDevice::WriteReg8(int i2creg, unsigned char data)
         {
             if (i2c_smbus_write_byte_data(m_fdI2CDevice, i2creg, data) < 0) {
                 throw errorhandling::ComsException("Failed to write data to I2C device");
             }
         }
 
-        unsigned short Pi4I2CDevice::ReadReg16(int i2creg)
+        unsigned short LinuxI2CDevice::ReadReg16(int i2creg)
         {
             unsigned short reg16ns = i2c_smbus_read_word_data(m_fdI2CDevice, i2creg);
             unsigned short reg16 = ((reg16ns << 8) | (reg16ns >> 8)); // reverse the bytes
             return reg16;
         }
 
-        void Pi4I2CDevice::WriteReg16(int i2creg, unsigned short data)
+        void LinuxI2CDevice::WriteReg16(int i2creg, unsigned short data)
         {
             if (i2c_smbus_write_word_data(m_fdI2CDevice, i2creg, data) < 0) {
                 throw errorhandling::ComsException("Failed to write data to I2C device");
             }
         }
 
-        std::vector<unsigned char> Pi4I2CDevice::ReadBlock(int i2creg)
+        std::vector<unsigned char> LinuxI2CDevice::ReadBlock(int i2creg)
         {
             //function reads at most 32 bytes
             std::vector<unsigned char> databuf;
@@ -73,7 +73,7 @@ namespace sbrcontroller {
             return databuf;
         }
 
-        void Pi4I2CDevice::WriteBlock(int i2creg, const std::vector<unsigned char>& buffer)
+        void LinuxI2CDevice::WriteBlock(int i2creg, const std::vector<unsigned char>& buffer)
         {
             //function reads at most 32 bytes
             if (i2c_smbus_write_block_data(m_fdI2CDevice, i2creg, buffer.size(), &buffer[0]) < 0) {

@@ -6,7 +6,7 @@ set(header_files
     sbrcontroller.h
     sensors.h
     ahrs/AHRS.h
-    ahrs/AHRSController.h
+    ahrs/AHRSManager.h
 )
 
 add_executable(sbrcontrollerd main.cpp ${header_files})
