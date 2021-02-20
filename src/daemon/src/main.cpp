@@ -12,10 +12,13 @@
 #include <algorithm>
 #include <numeric>
 #include <chrono>
+#include <thread>
 
 //## TODO DEBUGGING, Remove
 #include "sbrcontroller.h"
 #include "LinuxSerialDevice.h"
+#include "StringReaderWriter.h"
+#include "IChecksumCalculator.h"
 
 using namespace std;
 using namespace sbrcontroller;
@@ -48,7 +51,41 @@ int main()
             if (configSection->GetConfigValue("type") == "serial") {
                 auto serialPort = configSection->GetConfigValue("serialPort");
                 int baudRate = std::stoi(configSection->GetConfigValue("baud"));
-                auto pSerial = make_shared<coms::LinuxSerialDevice>(serialPort, baudRate);
+                
+                auto pRawSerial = make_shared<coms::LinuxSerialDevice>(serialPort, baudRate);
+                auto pSerialReaderWriter = make_shared<coms::StringReaderWriter>(pRawSerial);
+                auto pChecksumCalc = pFactory->CreateChecksumCalculator();
+                std::string m0_cmd_SetClosedLoop = "w odrv0.axis0.requested_state AXIS_STATE_CLOSED_LOOP_CONTROL";
+                auto m0_cmd_SetClosedLoop_cs = pChecksumCalc->Calculate(m0_cmd_SetClosedLoop);
+                std::string m0_cmd_SetIdleState = "w odrv0.axis0.requested_state AXIS_STATE_IDLE";
+                auto m0_cmd_SetIdleState_cs = pChecksumCalc->Calculate(m0_cmd_SetIdleState);
+                std::string m0_cmd_SetVel1rpm = "v 0 1 0";
+                auto m0_cmd_SetVel1rpm_cs = pChecksumCalc->Calculate(m0_cmd_SetVel1rpm);
+                std::string m0_cmd_SetVel0rpm = "v 0 0 0";
+                auto m0_cmd_SetVel0rpm_cs = pChecksumCalc->Calculate(m0_cmd_SetVel0rpm);
+
+                logger->info("Sending: {}{}\n", m0_cmd_SetClosedLoop, m0_cmd_SetClosedLoop_cs);
+                pSerialReaderWriter->Write(m0_cmd_SetClosedLoop + m0_cmd_SetClosedLoop_cs + "\n");
+                auto response = pSerialReaderWriter->Read();
+                logger->info(response);
+                logger->info("Sending: {}{}\n", m0_cmd_SetVel1rpm, m0_cmd_SetVel1rpm_cs);
+                pSerialReaderWriter->Write(m0_cmd_SetVel1rpm + m0_cmd_SetVel1rpm_cs + "\n");
+                auto response2 = pSerialReaderWriter->Read();
+                logger->info(response2);
+                // pause
+                std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+                // end pause
+                logger->info("Sending: {}{}\n", m0_cmd_SetVel0rpm, m0_cmd_SetVel0rpm_cs);
+                pSerialReaderWriter->Write(m0_cmd_SetVel0rpm + m0_cmd_SetVel0rpm_cs + "\n");
+                auto response3 = pSerialReaderWriter->Read();
+                logger->info(response3);
+                logger->info("Sending: {}{}\n", m0_cmd_SetIdleState, m0_cmd_SetIdleState_cs);
+                pSerialReaderWriter->Write(m0_cmd_SetIdleState + m0_cmd_SetIdleState_cs + "\n");
+                auto response4 = pSerialReaderWriter->Read();
+                logger->info(response4);
+                //"v 0 1 0\n"
+                // TODO: add in gcode XOR addition, read check after write for confirm, and
+                // set closed loop control before doing moves
             }
 
             printf("Press Return to quit\n");  

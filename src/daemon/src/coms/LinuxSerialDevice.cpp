@@ -1,5 +1,7 @@
 #include "LinuxSerialDevice.h"
 #include "sbrcontroller.h"
+#include <cstring>
+#include <algorithm>
 #include <fmt/core.h>
 #include <fmt/format.h>
 #include <fcntl.h> // Contains file controls like O_RDWR
@@ -11,29 +13,15 @@
 namespace sbrcontroller {
     namespace coms {
 
-        LinuxSerialDevice::LinuxSerialDevice(const std::string& serialDeviceName, int baudRate) :
-            m_bKillSignal(ATOMIC_VAR_INIT(false))
+        LinuxSerialDevice::LinuxSerialDevice(const std::string& serialDeviceName, int baudRate)
         {
-            m_tComsThread = std::thread([serialDeviceName,baudRate,this] {
-                SerialComsThreadProc(serialDeviceName, baudRate);
-            });
-        }
-
-        LinuxSerialDevice::~LinuxSerialDevice()
-        {
-            m_bKillSignal.store(true);
-            m_tComsThread.join();
-        }
-
-        void LinuxSerialDevice::SerialComsThreadProc(const std::string& serialDeviceName, int baudRate)
-        {
-            int fdSerialPort = open(serialDeviceName.c_str(), O_RDWR);
-            if (fdSerialPort < 0) {
+            m_fdSerialPort = open(serialDeviceName.c_str(), O_RDWR);
+            if (m_fdSerialPort < 0) {
                 throw errorhandling::ComsException(fmt::format("Could not open serial device. Error code {:d} - {}", errno, strerror(errno)));
             }
             // get current coms options
             termios tty = {};
-            if(tcgetattr(fdSerialPort, &tty) != 0) {
+            if(tcgetattr(m_fdSerialPort, &tty) != 0) {
                 throw errorhandling::ComsException(fmt::format("Error {:d} from tcgetattr: {}", errno, strerror(errno)));
             }
             tty.c_cflag &= ~PARENB; // Clear parity bit, disabling parity (most common)
@@ -57,7 +45,7 @@ namespace sbrcontroller {
             tty.c_cc[VMIN] = 0;
 
             // Set in/out baud rate
-            static const auto supportedBaudLookup = std::map<int, speed_t> {
+            static const std::map<int, speed_t> supportedBaudLookup = std::map<int, speed_t> {
                 {9600, B9600},
                 {19200, B19200},
                 {38400, B38400},
@@ -73,33 +61,34 @@ namespace sbrcontroller {
             }
             cfsetspeed(&tty, supportedBaud->second);
 
-            if (tcsetattr(fdSerialPort, TCSANOW, &tty) != 0) {
+            if (tcsetattr(m_fdSerialPort, TCSANOW, &tty) != 0) {
                 throw errorhandling::ComsException(fmt::format("Error {:d} from tcsetattr: {}", errno, strerror(errno)));
             }
-
-/*
-            while (!m_bKillSignal.load())
-            {
-                m_ioQueue.empty
-                int n = read(fdSerialPort, &read_buf, sizeof(read_buf));
-            }*/
-            // test doing a write here
-            std::string command = "v 0 1 0\n";
-            std::vector<unsigned char> writeBuf(command.begin(), command.end());
-            write(fdSerialPort, writeBuf.data(), writeBuf.size());
-
-            close(fdSerialPort);
         }
 
-        std::future<std::vector<unsigned char>> LinuxSerialDevice::ReadAsync(int numBytesToRead) const
+        LinuxSerialDevice::~LinuxSerialDevice()
         {
-            throw errorhandling::NotImplementedException("Not implemented");
+            close(m_fdSerialPort);
         }
 
-        std::future<void> LinuxSerialDevice::WriteAsync(const std::vector<unsigned char>& bytesToWrite) const
+        int LinuxSerialDevice::Read(char* bufferToRead, int bufLen) const
         {
-            throw errorhandling::NotImplementedException("Not implemented");
+            int numBytesRead = read(m_fdSerialPort, bufferToRead, bufLen);
+            if (numBytesRead < 0) {
+                throw errorhandling::ComsException(fmt::format("Error {:d} from read: {}", errno, strerror(errno)));
+            }
+            return numBytesRead;
         }
+
+        int LinuxSerialDevice::Write(char* bufferToWrite, int bufLen) const
+        {
+            int numBytesWritten = write(m_fdSerialPort, bufferToWrite, bufLen);
+            if (numBytesWritten < 0) {
+                throw errorhandling::ComsException(fmt::format("Error {:d} from write: {}", errno, strerror(errno)));
+            }
+            return numBytesWritten;
+        }
+
     }
 
 }

@@ -30,10 +30,17 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
   include_directories("${gtest_SOURCE_DIR}/include")
 endif()
 
-# Now simply link against gtest or gtest_main as needed. Eg
-add_executable(sbrtests ExampleTest.cpp AHRSPerformanceTests.cpp MemoryConfigProvider.h)
+set(sbrtest_sources
+MemoryConfigProvider.h
+AHRSPerformanceTests.cpp
+StringReaderWriterTests.cpp
+GCodeChecksumCalcTests.cpp
+)
 
-set(test_includes
+# Now simply link against gtest or gtest_main as needed. Eg
+add_executable(sbrtests ${sbrtest_sources})
+
+set(sbrtest_includes
 ./
 ../src
 ../src/ahrs
@@ -45,8 +52,8 @@ set(test_includes
 
 find_package(Threads REQUIRED)
 
-target_include_directories(sbrtests PRIVATE ${test_includes})
-target_link_libraries(sbrtests gtest gtest_main utility spdlog Threads::Threads)
+target_include_directories(sbrtests PRIVATE ${sbrtest_includes})
+target_link_libraries(sbrtests gmock gtest gtest_main utility spdlog Threads::Threads)
 
 include(CTest)
 include(GoogleTest)

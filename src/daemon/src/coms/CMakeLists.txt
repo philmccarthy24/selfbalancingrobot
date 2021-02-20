@@ -4,9 +4,11 @@ set(coms_files
   LinuxI2CDevice.cpp
   WiringPiWrapper.h
   WiringPiWrapper.cpp
-  ISerialDevice.h
+  IDataDevice.h
   LinuxSerialDevice.h
   LinuxSerialDevice.cpp
+  StringReaderWriter.h
+  StringReaderWriter.cpp
 )
 
 add_library(coms ${coms_files})

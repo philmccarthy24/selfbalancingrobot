@@ -16,6 +16,8 @@ namespace sbrcontroller {
             virtual std::shared_ptr<ahrs::algorithms::IAHRSFusionAlgorithm> CreateFusionAlgorithm() const override;
             virtual std::shared_ptr<sbrcontroller::sensors::ISensor> CreateSensor(const std::string& config) const override;
 
+            virtual std::shared_ptr<IChecksumCalculator> CreateChecksumCalculator() const override;
+
         private:
         };
     }

@@ -8,6 +8,7 @@
 #include "MPU6050Accel.h"
 #include "MPU6050Gyro.h"
 #include "LinuxI2CDevice.h"
+#include "GCodeChecksumCalc.h"
 #include "ILoggerFactory.h"
 
 using namespace sbrcontroller::sensors;
@@ -80,6 +81,11 @@ namespace sbrcontroller {
                 throw errorhandling::NotImplementedException("Code does not yet exist to create sensor " + config + " specified.");
             }
             return pSensor;
+        }
+
+        std::shared_ptr<IChecksumCalculator> SBRProdFactory::CreateChecksumCalculator() const
+        {
+            return std::make_shared<GCodeChecksumCalc>();
         }
 
     }

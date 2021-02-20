@@ -26,6 +26,8 @@ namespace sbrcontroller {
     namespace utility {
         // forward class defs for better decoupling
 
+        class IChecksumCalculator;
+
         class ISBRFactory
         {
         public:
@@ -39,6 +41,8 @@ namespace sbrcontroller {
             virtual std::shared_ptr<sbrcontroller::sensors::ISensor> CreateSensor(const std::string& config) const = 0;
 
             //... add more here. will need motor controller abstraction, etc
+            virtual std::shared_ptr<IChecksumCalculator> CreateChecksumCalculator() const = 0;
+            
         };
     }
 }

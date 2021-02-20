@@ -16,11 +16,13 @@
         "motors": [
             {
                 "name": "right",
-                "id": 0
+                "id": 0,
+                "reversed": false
             },
             {
                 "name": "left",
-                "id": 1
+                "id": 1,
+                "reversed": true
             }
         ]
     },
