@@ -21,5 +21,5 @@ set(coms_includes
 # find_library(wiringPi_LIB wiringPi)
 # target_link_libraries(coms PRIVATE ${wiringPi_LIB})
 
-target_link_libraries(coms PRIVATE i2c fmt::fmt)
+target_link_libraries(coms PRIVATE i2c fmt::fmt spdlog)
 target_include_directories(coms PRIVATE ${coms_includes})

@@ -1,5 +1,6 @@
 #include "LinuxSerialDevice.h"
 #include "sbrcontroller.h"
+#include "spdlog/spdlog.h"
 #include <cstring>
 #include <algorithm>
 #include <fmt/core.h>
@@ -13,7 +14,8 @@
 namespace sbrcontroller {
     namespace coms {
 
-        LinuxSerialDevice::LinuxSerialDevice(const std::string& serialDeviceName, int baudRate)
+        LinuxSerialDevice::LinuxSerialDevice(std::shared_ptr<spdlog::logger> pLogger, const std::string& serialDeviceName, int baudRate) :
+            m_pLogger(pLogger)
         {
             m_fdSerialPort = open(serialDeviceName.c_str(), O_RDWR);
             if (m_fdSerialPort < 0) {
@@ -77,6 +79,7 @@ namespace sbrcontroller {
             if (numBytesRead < 0) {
                 throw errorhandling::ComsException(fmt::format("Error {:d} from read: {}", errno, strerror(errno)));
             }
+            m_pLogger->info("read {} bytes from serial port: {}", numBytesRead, std::string(bufferToRead, numBytesRead));
             return numBytesRead;
         }
 
@@ -86,6 +89,7 @@ namespace sbrcontroller {
             if (numBytesWritten < 0) {
                 throw errorhandling::ComsException(fmt::format("Error {:d} from write: {}", errno, strerror(errno)));
             }
+            m_pLogger->info("wrote {} bytes to serial port: {}", numBytesWritten, std::string(bufferToWrite, numBytesWritten));
             return numBytesWritten;
         }
 

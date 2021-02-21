@@ -27,9 +27,9 @@ TEST_F(GCodeChecksumCalcTests, CheckCorrectChecksum)
 {
     sbrcontroller::utility::GCodeChecksumCalc calc;
 
-    auto checksum = calc.Calculate("Testing checksum");
+    auto checksum = calc.Calculate("r vbus_voltage ");
 
-    ASSERT_EQ(checksum, "*7b");
+    ASSERT_EQ(checksum, "*93");
 }
 
     }

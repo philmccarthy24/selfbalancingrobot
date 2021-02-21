@@ -1,6 +1,10 @@
 #pragma once
+#include <memory>
 #include "IDataDevice.h"
-#include <map>
+
+namespace spdlog {
+    class logger;
+}
 
 namespace sbrcontroller {
     namespace coms {
@@ -8,7 +12,7 @@ namespace sbrcontroller {
         class LinuxSerialDevice : public IDataDevice
         {
         public:
-            LinuxSerialDevice(const std::string& serialDeviceName, int baudRate = 115200);
+            LinuxSerialDevice(std::shared_ptr<spdlog::logger> pLogger, const std::string& serialDeviceName, int baudRate = 115200);
             virtual ~LinuxSerialDevice();
 
             virtual int Read(char* bufferToRead, int bufLen) const override;
@@ -16,6 +20,8 @@ namespace sbrcontroller {
 
         private:
             int m_fdSerialPort;
+
+            std::shared_ptr<spdlog::logger> m_pLogger;
         };
     }
 }

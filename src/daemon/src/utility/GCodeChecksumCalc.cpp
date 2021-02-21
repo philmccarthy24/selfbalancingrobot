@@ -15,12 +15,12 @@ namespace sbrcontroller {
 
         std::string GCodeChecksumCalc::Calculate(const std::string& source) const
         {
-            unsigned char cs8bit = 0;
-            for (char const &c : source)
+            char cs8bit = 0;
+            for (const char& c : source)
             {
                 cs8bit ^= c;
             }
-            return fmt::format("*{:X}", cs8bit);
+            return fmt::format("*{:d}", cs8bit);
         }
     }
 }
