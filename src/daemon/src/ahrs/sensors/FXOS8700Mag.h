@@ -21,6 +21,8 @@ namespace sbrcontroller {
             class FXOS8700Mag : public sbrcontroller::sensors::ISensor 
             {
                 public:
+                    static const int I2C_ADDR = 0x1F; // Precision Magnetometer and Accelerometer IC
+
                     FXOS8700Accel(std::shared_ptr<coms::II2CDevice> pI2CDevice);
                     virtual ~FXOS8700Accel();
 

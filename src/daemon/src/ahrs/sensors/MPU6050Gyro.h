@@ -35,6 +35,8 @@ namespace sbrcontroller {
             class MPU6050Gyro : public sbrcontroller::sensors::ISensor 
             {
                 public:
+                    static const int I2C_ADDR = 0x68; // Gyroscope and Accelerometer IC
+
                     MPU6050Gyro(std::shared_ptr<coms::II2CDevice> pI2CDevice, std::shared_ptr<spdlog::logger> pLogger);
                     virtual ~MPU6050Gyro();
 

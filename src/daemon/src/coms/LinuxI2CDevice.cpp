@@ -81,5 +81,63 @@ namespace sbrcontroller {
             }
         }
 
+        /*
+        I don't know if the block reads/writes above work, eg the read doesn't read n bytes.
+
+        Here is an example from https://stackoverflow.com/questions/55976683/read-a-block-of-data-from-a-specific-registerfifo-using-c-c-and-i2c-in-raspb
+        that uses raw ioctls to do block reads/writes (not tested, to try at some point):
+
+        static inline int i2c_rdwr_block(int fd, uint8_t reg, uint8_t read_write, uint8_t length, unsigned char* buffer)
+        {
+            struct i2c_smbus_ioctl_data ioctl_data;
+            union i2c_smbus_data smbus_data;
+
+            int rv; 
+
+            if(length > I2C_SMBUS_BLOCK_MAX) 
+            {
+                std::cerr << "Requested Length is greater than the maximum specified" << std::endl;
+                return -1;
+            }
+
+            // First byte is always the size to write and to receive 
+            // https://github.com/torvalds/linux/blob/master/drivers/i2c/i2c-core-smbus.c  
+            // (See i2c_smbus_xfer_emulated CASE:I2C_SMBUS_I2C_BLOCK_DATA)
+            smbus_data.block[0] = length;
+
+            if ( read_write != I2C_SMBUS_READ )
+            {
+                for(int i = 0; i < length; i++)
+                {
+                    smbus_data.block[i + 1] = buffer[i];
+                }
+            }
+
+            ioctl_data.read_write = read_write;
+            ioctl_data.command = reg;
+            ioctl_data.size = I2C_SMBUS_I2C_BLOCK_DATA;
+            ioctl_data.data = &smbus_data;
+
+            rv = ioctl (fd, I2C_SMBUS, &ioctl_data);
+            if (rv < 0)
+            {
+                std::cerr << "Accessing I2C Read/Write failed! Error is: " << strerror(errno) << std::endl;
+                return rv;
+            }
+
+            if (read_write == I2C_SMBUS_READ)
+            {
+                for(int i = 0; i < length; i++)
+                {
+                    // Skip the first byte, which is the length of the rest of the block.
+                    buffer[i] = smbus_data.block[i+1];
+                }
+            }
+
+            return rv;
+        }
+
+        */
+
     }
 }

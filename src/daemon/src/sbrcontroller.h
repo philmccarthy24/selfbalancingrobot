@@ -15,9 +15,6 @@ namespace sbrcontroller {
     static const std::string MOTOR_CONTROL_COMS_KEY = "/motorControl/coms";
 
     // engineering constants
-    static const int MPU6050_I2C_ADDR = 0x68; // Gyroscope and Accelerometer IC
-    static const int FXOS8700_I2C_ADDR = 0x1F; // Precision Magnetometer and Accelerometer IC
-    static const int FXAS21002C_I2C_ADDR = 0x21; // Precision Gyroscope IC
 
     // exceptions
     namespace errorhandling {
@@ -25,6 +22,15 @@ namespace sbrcontroller {
         {
         public:
             NotImplementedException(const std::string& msg) : 
+                std::logic_error(msg) 
+            {
+            }
+        };
+
+        class BadLogicException : public std::logic_error
+        {
+        public:
+            BadLogicException(const std::string& msg) : 
                 std::logic_error(msg) 
             {
             }
@@ -61,6 +67,15 @@ namespace sbrcontroller {
         {
         public:
             ConfigurationException(const std::string& msg) : 
+                std::runtime_error(msg) 
+            {
+            }
+        };
+
+        class InvalidDeviceException : public std::runtime_error
+        {
+        public:
+            InvalidDeviceException(const std::string& msg) : 
                 std::runtime_error(msg) 
             {
             }

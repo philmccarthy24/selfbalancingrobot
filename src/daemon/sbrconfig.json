@@ -3,7 +3,7 @@
         "fusionAlgorithm": "Madgwick",
         "sensorSampleRateHz": 20,
         "sensors": [
-            "MPU6050_gyro",
+            "FXAS2100_gyro",
             "MPU6050_accel"
         ]
     },

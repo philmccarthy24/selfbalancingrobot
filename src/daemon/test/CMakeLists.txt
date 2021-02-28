@@ -35,6 +35,7 @@ MemoryConfigProvider.h
 AHRSPerformanceTests.cpp
 StringReaderWriterTests.cpp
 GCodeChecksumCalcTests.cpp
+MotorComsIntegrationTests.cpp
 )
 
 # Now simply link against gtest or gtest_main as needed. Eg

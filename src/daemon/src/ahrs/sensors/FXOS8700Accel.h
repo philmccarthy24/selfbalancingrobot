@@ -12,15 +12,18 @@ namespace sbrcontroller {
     namespace ahrs {
         namespace sensors {
 
-            
-
             /***
              * Provides raw sensor readings over I2C bus from FXOS8700 Accelerometer
+             * Programming example:
+             * https://github.com/adafruit/Adafruit_FXOS8700/blob/master/Adafruit_FXOS8700.h
+             * https://github.com/adafruit/Adafruit_FXOS8700/blob/master/Adafruit_FXOS8700.cpp
              * 
              */ 
             class FXOS8700Accel : public sbrcontroller::sensors::ISensor 
             {
                 public:
+                    static const int I2C_ADDR = 0x1F; // Precision Magnetometer and Accelerometer IC
+
                     FXOS8700Accel(std::shared_ptr<coms::II2CDevice> pI2CDevice);
                     virtual ~FXOS8700Accel();
 
