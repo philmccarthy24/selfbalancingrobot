@@ -1,5 +1,7 @@
 #include "LinuxI2CDevice.h"
 #include "sbrcontroller.h"
+#include <fmt/core.h>
+#include <fmt/format.h>
 // headers required for RPi Buster i2c use
 //https://www.kernel.org/doc/Documentation/i2c/dev-interface
 #include <unistd.h>
@@ -44,7 +46,7 @@ namespace sbrcontroller {
         void LinuxI2CDevice::WriteReg8(int i2creg, unsigned char data)
         {
             if (i2c_smbus_write_byte_data(m_fdI2CDevice, i2creg, data) < 0) {
-                throw errorhandling::ComsException("Failed to write data to I2C device");
+                throw errorhandling::ComsException(fmt::format("Failed to write data to I2C device: Error {:d} : {}", errno, strerror(errno)));
             }
         }
 

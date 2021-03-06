@@ -8,6 +8,8 @@
 #include "MPU6050Accel.h"
 #include "MPU6050Gyro.h"
 #include "FXAS21002Gyro.h"
+#include "FXOS8700Accel.h"
+#include "FXOS8700Mag.h"
 #include "LinuxI2CDevice.h"
 #include "GCodeChecksumCalc.h"
 #include "ILoggerFactory.h"
@@ -71,14 +73,22 @@ namespace sbrcontroller {
         std::shared_ptr<ISensor> SBRProdFactory::CreateSensor(const std::string& config) const
         {
             std::shared_ptr<ISensor> pSensor = nullptr;
-            if (config == "MPU6050_gyro") {
-                auto pI2CDevice = CreateI2CDevice(MPU6050Gyro::I2C_ADDR);
-                auto pLogger = Register::LoggerFactory().CreateLogger("MPU6050Gyro");
-                pSensor = std::make_shared<MPU6050Gyro>(pI2CDevice, pLogger);
-            } else if (config == "FXAS2100_gyro") {
+            if (config == "FXAS2100_gyro") {
                 auto pI2CDevice = CreateI2CDevice(FXAS2100Gyro::I2C_ADDR);
                 auto pLogger = Register::LoggerFactory().CreateLogger("FXAS2100Gyro");
                 pSensor = std::make_shared<FXAS2100Gyro>(pI2CDevice, pLogger);
+            } else if (config == "FXOS8700_accel") {
+                auto pI2CDevice = CreateI2CDevice(FXOS8700Accel::I2C_ADDR);
+                auto pLogger = Register::LoggerFactory().CreateLogger("FXOS8700Accel");
+                pSensor = std::make_shared<FXOS8700Accel>(pI2CDevice, pLogger);
+            } else if (config == "FXOS8700_mag") {
+                auto pI2CDevice = CreateI2CDevice(FXOS8700Mag::I2C_ADDR);
+                auto pLogger = Register::LoggerFactory().CreateLogger("FXOS8700Mag");
+                pSensor = std::make_shared<FXOS8700Mag>(pI2CDevice, pLogger);
+            } else if (config == "MPU6050_gyro") {
+                auto pI2CDevice = CreateI2CDevice(MPU6050Gyro::I2C_ADDR);
+                auto pLogger = Register::LoggerFactory().CreateLogger("MPU6050Gyro");
+                pSensor = std::make_shared<MPU6050Gyro>(pI2CDevice, pLogger);
             } else if (config == "MPU6050_accel") {
                 auto pI2CDevice = CreateI2CDevice(MPU6050Accel::I2C_ADDR);
                 pSensor = std::make_shared<MPU6050Accel>(pI2CDevice);

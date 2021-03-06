@@ -4,7 +4,8 @@
         "sensorSampleRateHz": 20,
         "sensors": [
             "FXAS2100_gyro",
-            "MPU6050_accel"
+            "FXOS8700_accel",
+            "FXOS8700_mag"
         ]
     },
     "motorControl": {

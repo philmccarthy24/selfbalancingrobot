@@ -139,6 +139,15 @@ namespace sbrcontroller {
 				m_q.x *= recipNorm;
 				m_q.y *= recipNorm;
 				m_q.z *= recipNorm;
+
+				if (m_bSignalRequestReading) {
+					m_qOut.w = m_q.w;
+					m_qOut.x = m_q.x;
+					m_qOut.y = m_q.y;
+					m_qOut.z = m_q.z;
+					m_readingPromise.set_value(m_qOut);
+					m_bSignalRequestReading = false;
+				}
 			}
 
 			//---------------------------------------------------------------------------------------------------

@@ -52,7 +52,7 @@ namespace sbrcontroller {
 
                 // Reset then switch to active mode with 100Hz output
                 m_pFXAS2100->WriteReg8(GYRO_REGISTER_CTRL_REG1, 0x00);     // Standby
-                m_pFXAS2100->WriteReg8(GYRO_REGISTER_CTRL_REG1, (1 << 6)); // Reset
+                //m_pFXAS2100->WriteReg8(GYRO_REGISTER_CTRL_REG1, (1 << 6)); // Reset
                 m_pFXAS2100->WriteReg8(GYRO_REGISTER_CTRL_REG0, ctrlReg0); // Set sensitivity
                 m_pFXAS2100->WriteReg8(GYRO_REGISTER_CTRL_REG1, 0x0E);     // Active
 

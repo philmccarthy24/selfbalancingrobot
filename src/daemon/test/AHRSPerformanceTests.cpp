@@ -45,6 +45,29 @@ protected:
     }
 })CONFIG";
 
+    const std::string fxas2100_fxos8700_raw_madgwick_config = R"CONFIG(
+{
+    "ahrs": {
+        "fusionAlgorithm": "Madgwick",
+        "sensorSampleRateHz": 20,
+        "sensors": [
+            "FXAS2100_gyro",
+            "FXOS8700_accel",
+            "FXOS8700_mag"
+        ]
+    },
+    "logging": {
+        "level": "info",
+        "pattern": "%+",
+        "sinks": [
+            {
+                "type": "stdout_color_sink_mt"
+            }
+        ],
+        "loggers": []
+    }
+})CONFIG";
+
     virtual void SetUp()
     {      
      
@@ -53,6 +76,8 @@ protected:
     virtual void TearDown()
     { 
     }
+
+    void RestingSensorVarianceTest(const std::string& config);
 };
 
 /*
@@ -85,16 +110,32 @@ protected:
 */
 TEST_F(AHRSPerformanceTests, RestingSensorVarianceTest_mpu6050raw_madgwick)
 {
+    RestingSensorVarianceTest(mpu6050raw_madgwick_config);
+}
+
+/*
+[2021-03-06 10:17:57.795] [RestingSensorVarianceTest_fxas2100_fxos8700raw_madgwick] [info] Stationary ahrs analysis for 100 samples - collection took 30.6s (should be 30s):
+[2021-03-06 10:17:57.795] [RestingSensorVarianceTest_fxas2100_fxos8700raw_madgwick] [info] roll mean=-5.43718, sd=3.61412, minerr=-2.56607, maxerr=8.06178
+[2021-03-06 10:17:57.795] [RestingSensorVarianceTest_fxas2100_fxos8700raw_madgwick] [info] pitch mean=-16.51877, sd=4.41355, minerr=-7.56726, maxerr=15.99185
+[2021-03-06 10:17:57.795] [RestingSensorVarianceTest_fxas2100_fxos8700raw_madgwick] [info] yaw mean=71.53038, sd=29.94567, minerr=-71.32337, maxerr=26.02939
+*/
+TEST_F(AHRSPerformanceTests, RestingSensorVarianceTest_fxas2100_fxos8700raw_madgwick)
+{
+    RestingSensorVarianceTest(fxas2100_fxos8700_raw_madgwick_config);
+}
+
+void AHRSPerformanceTests::RestingSensorVarianceTest(const std::string& config)
+{
     //TODO: can we lift this up into a common area, and then
     // modify the config in memory for each test?
     utility::Register::RegisterConfigService(
             make_shared<utility::JSONConfig>(
-                make_shared<MemoryConfigProvider>(mpu6050raw_madgwick_config)
+                make_shared<MemoryConfigProvider>(config)
         ));
 
     auto pLoggerFactory = make_shared<utility::LoggerFactory>();
     utility::Register::RegisterLoggerFactory(pLoggerFactory);
-    auto logger = pLoggerFactory->CreateLogger("RestingSensorVarianceTest_mpu6050raw_madgwick");
+    auto logger = pLoggerFactory->CreateLogger(::testing::UnitTest::GetInstance()->current_test_info()->name());
 
     try {
         auto pFactory = make_shared<utility::SBRProdFactory>();
@@ -171,6 +212,7 @@ TEST_F(AHRSPerformanceTests, RestingSensorVarianceTest_mpu6050raw_madgwick)
         logger->error(ex.what());
     }
 
+    // TODO: Add failure thresholds?
     ASSERT_TRUE(true);
 
 }

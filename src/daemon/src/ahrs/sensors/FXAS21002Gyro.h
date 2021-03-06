@@ -48,7 +48,6 @@ namespace sbrcontroller {
 
                 private:
                     std::shared_ptr<coms::II2CDevice> m_pFXAS2100;
-                    float m_fCountsPerDegreesPerSec;
                     std::shared_ptr<spdlog::logger> m_pLogger;
 
                     ERange m_currentRange;

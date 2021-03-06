@@ -13,7 +13,7 @@ namespace sbrcontroller {
         enum ESensorDataType {
             TripleAxis_RotationalVelocity_RadiansPerSec,
             TripleAxis_Acceleration_G,
-            TripleAxis_MagneticFieldStrength_Gauss
+            TripleAxis_MagneticFieldStrength_MicroTesla
         };
 
         struct TripleAxisData

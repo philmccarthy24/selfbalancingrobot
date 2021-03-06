@@ -29,7 +29,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/test/sbrtests",
-            "args": ["--gtest_filter=GCodeChecksumCalcTests.*"],
+            "args": ["--gtest_filter=AHRSPerformanceTests.RestingSensorVarianceTest_fxas2100_fxos8700raw_madgwick"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
