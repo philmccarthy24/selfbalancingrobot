@@ -1,11 +1,11 @@
-<svg width="605" height="400" xmlns="http://www.w3.org/2000/svg">
+<svg width="605" height="405" xmlns="http://www.w3.org/2000/svg">
 	<defs>
-		<mask id="textmask" x="0" y="200" width="400" height="400">
-			<text x="100" y="100" font-family="fantasy" font-weight="bold" font-size="7em" fill="#999">Self</text>
-			<text x="30" y="200" font-family="fantasy" font-weight="bold" font-size="7em" fill="#999">Balancing</text>
-			<text x="150" y="300" font-family="fantasy" font-weight="bold" font-size="7em" fill="#999">Robot</text>
+		<mask id="textmask" x="0" y="0" width="400" height="405">
+			<text x="100" y="100" font-family="Helvetica" font-weight="bold" font-size="7em" fill="#fff">Self</text>
+			<text x="30" y="200" font-family="Helvetica" font-weight="bold" font-size="7em" fill="#fff">Balancing</text>
+			<text x="150" y="300" font-family="Helvetica" font-weight="bold" font-size="7em" fill="#fff">Robot</text>
 		</mask>
 	</defs>
 
-	<image width="605" height="806" href="https://raw.githubusercontent.com/philmccarthy24/selfbalancingrobot/master/media/controller.jpeg" mask="url(#textmask)" />
+	<image width="605" height="405" href="https://raw.githubusercontent.com/philmccarthy24/selfbalancingrobot/master/media/controller.jpeg" mask="url(#textmask)" />
 </svg>
