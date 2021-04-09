@@ -1,4 +1,4 @@
-![https://raw.githubusercontent.com/philmccarthy24/selfbalancingrobot/master/media/logo.svg]()
+![logo](https://raw.githubusercontent.com/philmccarthy24/selfbalancingrobot/master/media/logo.svg)
 
 ## Introduction
 
@@ -15,7 +15,7 @@ The robot has been built using:
 
 See the mechanical drawings in the docs/mechanical directory for further details. Here's a photo of the assembly during motor/ahrs testing:
 
-![https://raw.githubusercontent.com/philmccarthy24/selfbalancingrobot/master/media/motor_tests.jpeg]()
+![motor tests](https://raw.githubusercontent.com/philmccarthy24/selfbalancingrobot/master/media/motor_tests.jpeg)
 
 ## Electronics
 
