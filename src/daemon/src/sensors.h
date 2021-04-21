@@ -39,6 +39,7 @@ namespace sbrcontroller {
 
             virtual SensorInfo GetDeviceInfo() = 0;
             virtual int ReadSensorData(unsigned char* buffer, unsigned int length) = 0;
+            virtual void ClearCalibration() = 0;
         };
     }
 }

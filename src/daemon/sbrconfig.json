@@ -3,9 +3,25 @@
         "fusionAlgorithm": "Madgwick",
         "sensorSampleRateHz": 20,
         "sensors": [
-            "FXAS2100_gyro",
-            "FXOS8700_accel",
-            "FXOS8700_mag"
+            {
+                "id": "FXAS2100_gyro",
+                "calibration": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            {
+                "id": "FXOS8700_accel"
+            },
+            {
+                "id": "FXOS8700_mag",
+                "calibration": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            }
         ]
     },
     "motorControl": {

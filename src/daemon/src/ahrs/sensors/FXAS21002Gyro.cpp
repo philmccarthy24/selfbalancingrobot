@@ -21,8 +21,9 @@ namespace sbrcontroller {
                 { GYRO_RANGE_2000DPS, 0.0625F } 
             };
 
-            FXAS2100Gyro::FXAS2100Gyro(std::shared_ptr<coms::II2CDevice> pI2CDevice, std::shared_ptr<spdlog::logger> pLogger, ERange range) :
+            FXAS2100Gyro::FXAS2100Gyro(std::shared_ptr<coms::II2CDevice> pI2CDevice, const sbrcontroller::sensors::TripleAxisData& calibration, std::shared_ptr<spdlog::logger> pLogger, ERange range) :
                 m_pFXAS2100(pI2CDevice),
+                m_calibrationOffsets {calibration},
                 m_pLogger(pLogger),
                 m_currentRange(range)
             {
@@ -52,7 +53,7 @@ namespace sbrcontroller {
 
                 // Reset then switch to active mode with 100Hz output
                 m_pFXAS2100->WriteReg8(GYRO_REGISTER_CTRL_REG1, 0x00);     // Standby
-                //m_pFXAS2100->WriteReg8(GYRO_REGISTER_CTRL_REG1, (1 << 6)); // Reset
+                m_pFXAS2100->WriteReg8(GYRO_REGISTER_CTRL_REG1, 0x20/*(1 << 6)*/); // Reset
                 m_pFXAS2100->WriteReg8(GYRO_REGISTER_CTRL_REG0, ctrlReg0); // Set sensitivity
                 m_pFXAS2100->WriteReg8(GYRO_REGISTER_CTRL_REG1, 0x0E);     // Active
 
@@ -71,6 +72,11 @@ namespace sbrcontroller {
                 si.requiredDataLength = sizeof(TripleAxisData);
                 si.identifier = "FXAS2100Gyro Gyroscope device";
                 return si;
+            }
+
+            void FXAS2100Gyro::ClearCalibration()
+            {
+                m_calibrationOffsets = {};
             }
             
             int FXAS2100Gyro::ReadSensorData(unsigned char* buffer, unsigned int length)
@@ -97,7 +103,12 @@ namespace sbrcontroller {
                 pData->y = (gyYDps * M_PI) / 180.0f;
                 pData->z = (gyZDps * M_PI) / 180.0f;
 
-                m_pLogger->debug("x={:03.2f}, y={:03.2f}, z={:03.2f}", pData->x, pData->y, pData->z);
+                // apply calibration
+                pData->x -= m_calibrationOffsets.x;
+                pData->y -= m_calibrationOffsets.y;
+                pData->z -= m_calibrationOffsets.z;
+
+                m_pLogger->debug("x={}, y={}, z={}", pData->x, pData->y, pData->z);
                 
                 return sizeof(TripleAxisData);
             }

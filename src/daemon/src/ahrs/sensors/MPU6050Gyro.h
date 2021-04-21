@@ -42,6 +42,7 @@ namespace sbrcontroller {
 
                     virtual sbrcontroller::sensors::SensorInfo GetDeviceInfo() override;
                     virtual int ReadSensorData(unsigned char* buffer, unsigned int length) override;
+                    virtual void ClearCalibration() override {}
 
                 private:
                     std::shared_ptr<coms::II2CDevice> m_pMPU6050;

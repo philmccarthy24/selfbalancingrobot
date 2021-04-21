@@ -33,7 +33,7 @@ namespace sbrcontroller {
 			{
 			}
 
-			Madgwick::~Madgwick()
+			Mahony::~Mahony()
 			{
 			}
 

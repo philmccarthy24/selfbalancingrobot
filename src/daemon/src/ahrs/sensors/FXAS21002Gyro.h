@@ -40,17 +40,20 @@ namespace sbrcontroller {
 
                     static const int I2C_ADDR = 0x21; // Precision Gyroscope IC
 
-                    FXAS2100Gyro(std::shared_ptr<coms::II2CDevice> pI2CDevice, std::shared_ptr<spdlog::logger> pLogger, ERange range = GYRO_RANGE_250DPS);
+                    FXAS2100Gyro(std::shared_ptr<coms::II2CDevice> pI2CDevice, const sbrcontroller::sensors::TripleAxisData& calibration, std::shared_ptr<spdlog::logger> pLogger, ERange range = GYRO_RANGE_250DPS);
                     virtual ~FXAS2100Gyro();
 
                     virtual sbrcontroller::sensors::SensorInfo GetDeviceInfo() override;
                     virtual int ReadSensorData(unsigned char* buffer, unsigned int length) override;
+                    virtual void ClearCalibration() override;
 
                 private:
                     std::shared_ptr<coms::II2CDevice> m_pFXAS2100;
                     std::shared_ptr<spdlog::logger> m_pLogger;
 
                     ERange m_currentRange;
+
+                    sbrcontroller::sensors::TripleAxisData m_calibrationOffsets;
 
                     // registers
                     static const int GYRO_REGISTER_STATUS = 0x00;    /**< 0x00 */

@@ -16,8 +16,9 @@ namespace sbrcontroller {
 
             const float FXOS8700Mag::MAG_UT_LSB = 0.1F;
 
-            FXOS8700Mag::FXOS8700Mag(std::shared_ptr<coms::II2CDevice> pI2CDevice, std::shared_ptr<spdlog::logger> pLogger) :
+            FXOS8700Mag::FXOS8700Mag(std::shared_ptr<coms::II2CDevice> pI2CDevice, const sbrcontroller::sensors::TripleAxisData& hardIronOffset, std::shared_ptr<spdlog::logger> pLogger) :
                 m_pFXOS8700(pI2CDevice),
+                m_hardIronOffset {hardIronOffset},
                 m_pLogger(pLogger)
             {
                 // Make sure we have the correct chip ID since this checks
@@ -47,6 +48,11 @@ namespace sbrcontroller {
                 si.identifier = "FXOS8700 Magnetometer device";
                 return si;
             }
+
+            void FXOS8700Mag::ClearCalibration()
+            {
+                m_hardIronOffset = {};
+            }
             
             int FXOS8700Mag::ReadSensorData(unsigned char* buffer, unsigned int length)
             {
@@ -62,6 +68,11 @@ namespace sbrcontroller {
                 pData->x = static_cast<float>(magXRawCounts) * MAG_UT_LSB;
                 pData->y = static_cast<float>(magYRawCounts) * MAG_UT_LSB;
                 pData->z = static_cast<float>(magZRawCounts) * MAG_UT_LSB;
+
+                // apply calibration
+                pData->x -= m_hardIronOffset.x;
+                pData->y -= m_hardIronOffset.y;
+                pData->z -= m_hardIronOffset.z;
                 
                 return sizeof(TripleAxisData);
             }

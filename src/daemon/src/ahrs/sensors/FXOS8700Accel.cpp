@@ -76,9 +76,9 @@ namespace sbrcontroller {
                 // read raw counts from accelerometer
                 // Shift values to create properly formed integers
                 // Note, accel data is 14-bit and left-aligned, so we shift two bit right
-                short accXRawCounts = static_cast<short>(m_pFXOS8700->ReadReg16(FXOS8700_REGISTER_OUT_X_MSB)) >> 2;
-                short accYRawCounts = static_cast<short>(m_pFXOS8700->ReadReg16(FXOS8700_REGISTER_OUT_Y_MSB)) >> 2;
-                short accZRawCounts = static_cast<short>(m_pFXOS8700->ReadReg16(FXOS8700_REGISTER_OUT_Z_MSB)) >> 2;
+                short accXRawCounts = static_cast<short>(m_pFXOS8700->ReadReg16(FXOS8700_REGISTER_OUT_X_MSB) >> 2);
+                short accYRawCounts = static_cast<short>(m_pFXOS8700->ReadReg16(FXOS8700_REGISTER_OUT_Y_MSB) >> 2);
+                short accZRawCounts = static_cast<short>(m_pFXOS8700->ReadReg16(FXOS8700_REGISTER_OUT_Z_MSB) >> 2);
 
                 // Compensate values depending on the resolution - counts to units
                 const auto& si = m_RangeSensitivities.find(m_currentRange);
@@ -90,6 +90,8 @@ namespace sbrcontroller {
                 pData->x = static_cast<float>(accXRawCounts) * si->second;
                 pData->y = static_cast<float>(accYRawCounts) * si->second;
                 pData->z = static_cast<float>(accZRawCounts) * si->second;
+
+                m_pLogger->debug("x={}, y={}, z={}", pData->x, pData->y, pData->z);
                 
                 return sizeof(TripleAxisData);
             }

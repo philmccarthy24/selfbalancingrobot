@@ -57,14 +57,20 @@ protected:
         ]
     },
     "logging": {
-        "level": "info",
+        "level": "warning",
         "pattern": "%+",
         "sinks": [
             {
                 "type": "stdout_color_sink_mt"
             }
         ],
-        "loggers": []
+        "loggers": [
+            {
+                "name": "RestingSensorVarianceTest_fxas2100_fxos8700raw_madgwick",
+                "level": "trace",
+                "pattern": "%+"
+            }
+        ]
     }
 })CONFIG";
 
@@ -152,7 +158,7 @@ void AHRSPerformanceTests::RestingSensorVarianceTest(const std::string& config)
         for (int i = 0; i < sampleSize; i++) {
             auto currOrientation = ahrsDataSource->ReadOrientation();
             collectedData.push_back(currOrientation);
-            logger->trace("X rotation {:03.5f} degrees, Y rotation {:03.5f} degrees", currOrientation.GetRollInDegrees(), currOrientation.GetPitchInDegrees());
+            logger->trace("Roll {:03.5f} degrees, Pitch {:03.5f} degrees, Yaw {:03.5f} degrees", currOrientation.GetRollInDegrees(), currOrientation.GetPitchInDegrees(), currOrientation.GetYawInDegrees());
             std::this_thread::sleep_for(std::chrono::milliseconds(sleepMS));
         }
 

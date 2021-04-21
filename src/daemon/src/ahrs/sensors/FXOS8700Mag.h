@@ -25,15 +25,18 @@ namespace sbrcontroller {
                 public:
                     static const int I2C_ADDR = 0x1F; // Precision Magnetometer and Accelerometer IC
 
-                    FXOS8700Mag(std::shared_ptr<coms::II2CDevice> pI2CDevice, std::shared_ptr<spdlog::logger> pLogger);
+                    FXOS8700Mag(std::shared_ptr<coms::II2CDevice> pI2CDevice, const sbrcontroller::sensors::TripleAxisData& hardIronOffset, std::shared_ptr<spdlog::logger> pLogger);
                     virtual ~FXOS8700Mag();
 
                     virtual sbrcontroller::sensors::SensorInfo GetDeviceInfo() override;
                     virtual int ReadSensorData(unsigned char* buffer, unsigned int length) override;
+                    virtual void ClearCalibration() override;
 
                 private:
                     std::shared_ptr<coms::II2CDevice> m_pFXOS8700;
                     std::shared_ptr<spdlog::logger> m_pLogger;
+
+                    sbrcontroller::sensors::TripleAxisData m_hardIronOffset;
 
                     // registers
                     static const int FXOS8700_REGISTER_WHO_AM_I = 0x0D; /**< 0x0D (default value = 0b11000111, read only) */
