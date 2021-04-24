@@ -4,9 +4,13 @@
 #include "sbrcontroller.h"
 #include "SBRProdFactory.h"
 #include "LoggerFactory.h"
+#include "Calibration.h"
+#include "AHRS.h"
+#include "LinuxSerialDevice.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/stopwatch.h"
 #include <iostream>
+#include <unistd.h>
 #include <memory>
 #include <vector>
 #include <unistd.h>
@@ -14,6 +18,7 @@
 #include <numeric>
 #include <chrono>
 #include <thread>
+#include <atomic>
 #include <fmt/core.h>
 
 using namespace std;
@@ -21,17 +26,38 @@ using namespace sbrcontroller;
 
 /********************
  * 
- * Rationale for this is: we need a way to get up and running with AHRS sensor calibration. for now, use
- * a standalone tool that is hard coded for the mag and gyro sensors we're actually using.
- * Put calibration for these sensors in as a runtime config setting.
- * If in future we want to support a more fancy calibration from within the running system (which would
- * require stopping polling of sensors probably, and solving writing to config), can do that if it's desirable.
- * There are probably more useful things to get finished.
+ * Calibration tool and test harness for visualisation of device orientation
+ * 
+ * For calibration, ensure your sbrconfig.json is set up correctly with your device setings,
+ * then run
+ *  calibtool -calibrate
+ * 
+ * To use calibtool as a source of ahrs data for web visualisation, run
+ *  calibtool -ahrsdump (-q)
+ * use the -q flag to dump output in quarternions format instead of Euler angles.
+ *
+ * The visualiser website that can read the output data is at:
+ * https://adafruit.github.io/Adafruit_WebSerial_3DModelViewer/
+ * You will need to enable the #enable-experimental-web-platform-features flag in chrome://flags
+ * You will also need to enable the /dev/ttyS0 miniUART on GPIO pins 14 and 15 using
+ * sudo raspi-config (configure enabled but not a linux boot terminal)
+ * Then connect GPIO pins 14 and 15 with a cable to create a serial loopback
  * 
  ***********************/
 
-int main()
+int main(int argc, char** argv)
 {
+    std::vector<std::string> args;
+    for (int i = 1; i < argc; i++)
+    {
+        args.push_back(std::string(argv[i]));
+    }
+    if (args.empty()) {
+        printf("Calibtool: usage\ncalibtool -calibrate\n\tRuns a calibration of Gyro and Magnetometer\n");
+        printf("-ahrsdump (-q)\n\tOutputs visualisation data\n");
+        exit(0);
+    }
+
     try {
         utility::Register::RegisterConfigService(
                 make_shared<utility::JSONConfig>(
@@ -49,70 +75,55 @@ int main()
             
             logger->info("SBRController running!");
 
-            // create sensors from config
-            std::vector<std::shared_ptr<sbrcontroller::sensors::ISensor>> sensors;
-            auto sensorConfig = utility::Register::Config().GetConfigSections(sbrcontroller::AHRS_SENSOR_IDS_KEY);
-            for (auto& sensorConfig : sensorConfig)
+            if (args[0] == "-calibrate")
             {
-                sensors.push_back(pFactory->CreateSensor(sensorConfig));
-            }
-
-            // ok let's get the gyro and magnetometer to calibrate
-            std::shared_ptr<sbrcontroller::sensors::ISensor> gyro = nullptr;
-            std::shared_ptr<sbrcontroller::sensors::ISensor> mag = nullptr;
-            for (auto& sensor : sensors) 
-            {
-                auto sensorInfo = sensor->GetDeviceInfo();
-                if (sensorInfo.identifier == "FXAS2100Gyro Gyroscope device")
+                // create sensors from config
+                std::vector<std::shared_ptr<sbrcontroller::sensors::ISensor>> sensors;
+                auto sensorConfig = utility::Register::Config().GetConfigSections(sbrcontroller::AHRS_SENSOR_IDS_KEY);
+                for (auto& sensorConfig : sensorConfig)
                 {
-                    gyro = sensor;
-                    gyro->ClearCalibration();
+                    sensors.push_back(pFactory->CreateSensor(sensorConfig));
                 }
-                else if (sensorInfo.identifier == "FXOS8700 Magnetometer device")
-                {
-                    mag = sensor;
-                    mag->ClearCalibration();
-                }
+
+                calibtool::Calibration cal(sensors);
+
+                // first let's calibrate the gyro at rest.
+                cal.PerformGyroCalibration();
+
+                // Now the magnetometer.
+                cal.PerformMagnetometerCalibration();
+
+                printf("Calibration complete. Final calibration data:\n");
+                printf(fmt::format("Gyro Zero Rate Offset: x={}, y={}, z={}\n", cal.GetGyroCalibration().x, cal.GetGyroCalibration().y, cal.GetGyroCalibration().z).c_str());
+                printf(fmt::format("Magnetometer Hard Iron Offset: x={}, y={}, z={}\n", cal.GetMagnetometerCalibration().x, cal.GetMagnetometerCalibration().y, cal.GetMagnetometerCalibration().z).c_str());
             }
+            else if (args[0] == "-ahrsdump") {
+                bool useQuarternions = args.size() > 1 && args[1] == "-q";
+                printf(fmt::format("Dumping ahrs data in {} format to /dev/ttyS0.\n", useQuarternions ? "Quarternion" : "Euler angle").c_str());
+                printf("Press ENTER to continue. Press ENTER to then stop\n");
+                getchar();
 
-            // first let's calibrate the gyro at rest.
-            
-            printf("Gyro calibration\n");
-            printf("Place your gyro on a FLAT stable surface\n");
-            printf("Press ENTER to continue");
-            getchar();
+                std::atomic_bool stopDump;
+                stopDump.store(false);
+                std::thread dumpThread([&stopDump] () {
+                    auto ahrsDataSource = utility::Register::Factory().CreateAHRSDataSource();
 
-            sbrcontroller::sensors::TripleAxisData gyroReading = {};
-            float minX = 0, maxX = 0;
-            float minY = 0, maxY = 0;
-            float minZ = 0, maxZ = 0;
+                    auto pSerialLogger = utility::Register::LoggerFactory().CreateLogger("SerialLogger");
+                    sbrcontroller::coms::LinuxSerialDevice serialDevice(pSerialLogger, "/dev/ttyS0");
 
-            for (int i = 0; i < 500; i++)
-            {
-                gyro->ReadSensorData(reinterpret_cast<unsigned char*>(&gyroReading), sizeof(sbrcontroller::sensors::TripleAxisData));
-
-                printf(fmt::format("Gyro: x={}, y={}, z={}\n", gyroReading.x, gyroReading.y, gyroReading.z).c_str());
-
-                minX = std::min(minX, gyroReading.x);
-                minY = std::min(minY, gyroReading.y);
-                minZ = std::min(minZ, gyroReading.z);
-                maxX = std::max(maxX, gyroReading.x);
-                maxY = std::max(maxY, gyroReading.y);
-                maxZ = std::max(maxZ, gyroReading.z);
-
-                float offset_x = (minX + maxX) / 2;
-                float offset_y = (minY + maxY) / 2;
-                float offset_z = (minZ + maxZ) / 2;
-
-                printf(fmt::format("Zero Rate Offset: x={}, y={}, z={}\n", offset_x, offset_y, offset_z).c_str());
-
-                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+                    while (stopDump == false)
+                    {
+                        auto currOrientation = ahrsDataSource->ReadOrientation();
+                        auto datum = fmt::format("Orientation: {:3.2f}, {:3.2f}, {:3.2f}\n", currOrientation.GetRollInDegrees(), currOrientation.GetPitchInDegrees(), currOrientation.GetYawInDegrees());
+                        serialDevice.Write((char*)datum.c_str(), datum.size());
+                        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                    }                
+                });
+                getchar();
+                stopDump.store(true);
+                dumpThread.join();
             }
-
-            printf("\nPress Return to quit\n");  
-            getchar();
-            
-            
+                
         }
         catch (const std::exception& ex) {
             logger->error(ex.what());

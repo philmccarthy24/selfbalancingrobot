@@ -1,4 +1,4 @@
-![logo](https://raw.githubusercontent.com/philmccarthy24/selfbalancingrobot/master/media/logo.svg)
+![logo](https://raw.githubusercontent.com/philmccarthy24/selfbalancingrobot/master/media/logo.png)
 
 ## Introduction
 
@@ -27,7 +27,7 @@ A Raspberry Pi 4 SBC is powered off this circuit via a 5v down-converter, and ru
 - a FXOS8700 Accelerometer/Magnetometer IC over I2C bus
 - a 18-56v [ODrive 3.6 BLDC motor controller board](https://odriverobotics.com) over a ground-loop isolated USB/serial link at 115200 baud
 
-The AHRS breakout board containing the gyro/accelerometer/mag sensors is an Adafruit XXXX.
+The sensor hardware containing the gyro/accelerometer/mag sensors is an [Adafruit NXP 9-DOF Breakout Board](https://www.adafruit.com/product/3463).
 
 The wheel hub motors are driven by the ODrive at 36v.
 

@@ -1,4 +1,6 @@
 ﻿set(calibtool_sources
+Calibration.h
+Calibration.cpp
 main.cpp
 )
 
