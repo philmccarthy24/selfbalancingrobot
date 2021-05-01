@@ -11,7 +11,7 @@ namespace sbrcontroller
     }
     namespace ahrs
     {
-        struct Quarternion;
+        struct Quaternion;
 
         namespace algorithms {
 
@@ -24,7 +24,7 @@ namespace sbrcontroller
                 virtual void Update(const sensors::TripleAxisData& gyroData, const sensors::TripleAxisData& accelData, const sensors::TripleAxisData& magData) = 0;
                 virtual void UpdateIMU(const sensors::TripleAxisData& gyroData, const sensors::TripleAxisData& accelData) = 0;
 
-                virtual std::future<Quarternion> ReadFusedSensorDataAsync() = 0;
+                virtual std::future<Quaternion> ReadFusedSensorDataAsync() = 0;
             };
 
         }

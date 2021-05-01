@@ -83,9 +83,12 @@ namespace sbrcontroller {
                 auto pLogger = Register::LoggerFactory().CreateLogger("FXAS2100Gyro");
                 pSensor = std::make_shared<FXAS2100Gyro>(pI2CDevice, calData, pLogger);
             } else if (sensorId == "FXOS8700_accel") {
+                // get the stored calibration
+                auto calConfig = sensorConfig->GetConfigSections("calibration")[0];
+                auto calData = GetCalibrationData(calConfig);
                 auto pI2CDevice = CreateI2CDevice(FXOS8700Accel::I2C_ADDR);
                 auto pLogger = Register::LoggerFactory().CreateLogger("FXOS8700Accel");
-                pSensor = std::make_shared<FXOS8700Accel>(pI2CDevice, pLogger);
+                pSensor = std::make_shared<FXOS8700Accel>(pI2CDevice, calData, pLogger);
             } else if (sensorId == "FXOS8700_mag") {
                 // get the stored hard iron offset
                 auto calConfig = sensorConfig->GetConfigSections("calibration")[0];

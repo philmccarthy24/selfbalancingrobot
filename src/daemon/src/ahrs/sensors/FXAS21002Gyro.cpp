@@ -24,8 +24,7 @@ namespace sbrcontroller {
             FXAS2100Gyro::FXAS2100Gyro(std::shared_ptr<coms::II2CDevice> pI2CDevice, const sbrcontroller::sensors::TripleAxisData& calibration, std::shared_ptr<spdlog::logger> pLogger, ERange range) :
                 m_pFXAS2100(pI2CDevice),
                 m_calibrationOffsets {calibration},
-                m_pLogger(pLogger),
-                m_currentRange(range)
+                m_pLogger(pLogger)
             {
                 // Make sure we have the correct chip ID since this checks
                 // for correct address and that the IC is properly connected
@@ -33,6 +32,8 @@ namespace sbrcontroller {
                 if (id != FXAS21002C_ID) {
                     throw errorhandling::InvalidDeviceException(fmt::format("Expected id {:0x} but received id {:0x}", (int)FXAS21002C_ID, id));
                 }
+
+                m_pLogger->debug("Using Zero Rate Offset {}, {}, {}", m_calibrationOffsets.x, m_calibrationOffsets.y, m_calibrationOffsets.z);
                 
                 uint8_t ctrlReg0 = 0x00;
 
@@ -50,6 +51,11 @@ namespace sbrcontroller {
                         ctrlReg0 = 0x00;
                         break;
                 }
+
+                const auto& si = m_RangeSensitivities.find(range);
+                if (si == m_RangeSensitivities.end())
+                    throw errorhandling::BadLogicException(fmt::format("Sensitivity for range {} not specified", range));
+                m_unitScale = si->second;
 
                 // Reset then switch to active mode with 100Hz output
                 m_pFXAS2100->WriteReg8(GYRO_REGISTER_CTRL_REG1, 0x00);     // Standby
@@ -76,7 +82,7 @@ namespace sbrcontroller {
 
             void FXAS2100Gyro::ClearCalibration()
             {
-                m_calibrationOffsets = {};
+                m_calibrationOffsets = {0.0};
             }
             
             int FXAS2100Gyro::ReadSensorData(unsigned char* buffer, unsigned int length)
@@ -90,12 +96,9 @@ namespace sbrcontroller {
                 short gyZRawCounts = static_cast<short>(m_pFXAS2100->ReadReg16(GYRO_REGISTER_OUT_Z_MSB));
 
                 // Compensate values depending on the resolution - counts to units
-                const auto& si = m_RangeSensitivities.find(m_currentRange);
-                if (si == m_RangeSensitivities.end())
-                    throw errorhandling::BadLogicException(fmt::format("Sensitivity for range {} not specified", m_currentRange));
-                float gyXDps = gyXRawCounts * si->second;
-                float gyYDps = gyYRawCounts * si->second;
-                float gyZDps = gyZRawCounts * si->second;
+                float gyXDps = gyXRawCounts * m_unitScale;
+                float gyYDps = gyYRawCounts * m_unitScale;
+                float gyZDps = gyZRawCounts * m_unitScale;
 
                 // convert to radians
                 auto pData = reinterpret_cast<TripleAxisData*>(buffer);

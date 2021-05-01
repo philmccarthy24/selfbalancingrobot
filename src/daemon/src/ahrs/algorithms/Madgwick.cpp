@@ -27,9 +27,9 @@ namespace sbrcontroller {
 				beta(betaDef),
 				m_fSampleFreqHz(sampleFreq),
 				m_q{1.0f, 0.0f, 0.0f, 0.0f},
-				m_qOut{},
-				m_bSignalRequestReading(false)
+				m_qOut{}
 			{
+				m_bSignalRequestReading.store(false);
 			}
 
 			Madgwick::~Madgwick()
@@ -104,7 +104,7 @@ namespace sbrcontroller {
 					// Reference direction of Earth's magnetic field
 					hx = mag.x * q0q0 - _2q0my * m_q.z + _2q0mz * m_q.y + mag.x * q1q1 + _2q1 * mag.y * m_q.y + _2q1 * mag.z * m_q.z - mag.x * q2q2 - mag.x * q3q3;
 					hy = _2q0mx * m_q.z + mag.y * q0q0 - _2q0mz * m_q.x + _2q1mx * m_q.y - mag.y * q1q1 + mag.y * q2q2 + _2q2 * mag.z * m_q.z - mag.y * q3q3;
-					_2bx = sqrt(hx * hx + hy * hy);
+					_2bx = sqrtf(hx * hx + hy * hy);
 					_2bz = -_2q0mx * m_q.y + _2q0my * m_q.x + mag.z * q0q0 + _2q1mx * m_q.z - mag.z * q1q1 + _2q2 * mag.y * m_q.z - mag.z * q2q2 + mag.z * q3q3;
 					_4bx = 2.0f * _2bx;
 					_4bz = 2.0f * _2bz;
@@ -128,10 +128,11 @@ namespace sbrcontroller {
 				}
 
 				// Integrate rate of change of quaternion to yield quaternion
-				m_q.w += qDot1 * (1.0f / m_fSampleFreqHz);
-				m_q.x += qDot2 * (1.0f / m_fSampleFreqHz);
-				m_q.y += qDot3 * (1.0f / m_fSampleFreqHz);
-				m_q.z += qDot4 * (1.0f / m_fSampleFreqHz);
+				float invSampleFreq = (1.0f / m_fSampleFreqHz);
+				m_q.w += qDot1 * invSampleFreq;
+				m_q.x += qDot2 * invSampleFreq;
+				m_q.y += qDot3 * invSampleFreq;
+				m_q.z += qDot4 * invSampleFreq;
 
 				// Normalise quaternion
 				recipNorm = invSqrt(m_q.w * m_q.w + m_q.x * m_q.x + m_q.y * m_q.y + m_q.z * m_q.z);
@@ -210,10 +211,11 @@ namespace sbrcontroller {
 				}
 
 				// Integrate rate of change of quaternion to yield quaternion
-				m_q.w += qDot1 * (1.0f / m_fSampleFreqHz);
-				m_q.x += qDot2 * (1.0f / m_fSampleFreqHz);
-				m_q.y += qDot3 * (1.0f / m_fSampleFreqHz);
-				m_q.z += qDot4 * (1.0f / m_fSampleFreqHz);
+				float invSampleFreq = (1.0f / m_fSampleFreqHz);
+				m_q.w += qDot1 * invSampleFreq;
+				m_q.x += qDot2 * invSampleFreq;
+				m_q.y += qDot3 * invSampleFreq;
+				m_q.z += qDot4 * invSampleFreq;
 
 				// Normalise quaternion
 				recipNorm = invSqrt(m_q.w * m_q.w + m_q.x * m_q.x + m_q.y * m_q.y + m_q.z * m_q.z);
@@ -232,14 +234,15 @@ namespace sbrcontroller {
 				}
 			}
 
-			std::future<Quarternion> Madgwick::ReadFusedSensorDataAsync()
+			std::future<Quaternion> Madgwick::ReadFusedSensorDataAsync()
 			{
-				if (m_bSignalRequestReading) {
+				bool req = m_bSignalRequestReading.load();
+				if (req) {
 					throw std::runtime_error("signal reading already requested");
 				}
 
-				m_readingPromise = std::promise<Quarternion>();
-				m_bSignalRequestReading = true;
+				m_readingPromise = std::promise<Quaternion>();
+				m_bSignalRequestReading.store(true);
 				return m_readingPromise.get_future();
 			}
 
@@ -247,6 +250,7 @@ namespace sbrcontroller {
 			// Fast inverse square-root
 			// See: http://en.wikipedia.org/wiki/Fast_inverse_square_root
 
+/*
 			float Madgwick::invSqrt(float x) {
 				float halfx = 0.5f * x;
 				float y = x;
@@ -256,6 +260,13 @@ namespace sbrcontroller {
 				y = *(float*)&i;
 				y = y * (1.5f - (halfx * y * y));
 				return y;
+			}
+			*/
+
+			float Madgwick::invSqrt(float x) {
+				uint32_t i = 0x5F1F1412 - (*(uint32_t*)&x >> 1);
+				float tmp = *(float*)&i;
+				return tmp * (1.69000231f - 0.714158168f * x * tmp * tmp);
 			}
 		}
 	}

@@ -28,15 +28,15 @@ namespace sbrcontroller {
                 virtual void Update(const sensors::TripleAxisData& gyroData, const sensors::TripleAxisData& accelData, const sensors::TripleAxisData& magData) override;
                 virtual void UpdateIMU(const sensors::TripleAxisData& gyroData, const sensors::TripleAxisData& accelData) override;
 
-                virtual std::future<Quarternion> ReadFusedSensorDataAsync() override;
+                virtual std::future<Quaternion> ReadFusedSensorDataAsync() override;
 
             private:
                 volatile float twoKp;			// 2 * proportional gain (Kp)
                 volatile float twoKi;			// 2 * integral gain (Ki)
                 float m_fSampleFreqHz;
-                volatile Quarternion m_q;	// quaternion of sensor frame relative to auxiliary frame
-                Quarternion m_qOut;
-                std::promise<Quarternion> m_readingPromise;
+                volatile Quaternion m_q;	// quaternion of sensor frame relative to auxiliary frame
+                Quaternion m_qOut;
+                std::promise<Quaternion> m_readingPromise;
                 volatile bool m_bSignalRequestReading;
             };
         }

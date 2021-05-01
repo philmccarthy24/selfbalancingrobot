@@ -34,7 +34,7 @@ using namespace sbrcontroller;
  * 
  * To use calibtool as a source of ahrs data for web visualisation, run
  *  calibtool -ahrsdump (-q)
- * use the -q flag to dump output in quarternions format instead of Euler angles.
+ * use the -q flag to dump output in Quaternions format instead of Euler angles.
  *
  * The visualiser website that can read the output data is at:
  * https://adafruit.github.io/Adafruit_WebSerial_3DModelViewer/
@@ -54,7 +54,7 @@ int main(int argc, char** argv)
     }
     if (args.empty()) {
         printf("Calibtool: usage\ncalibtool -calibrate\n\tRuns a calibration of Gyro and Magnetometer\n");
-        printf("-ahrsdump (-q)\n\tOutputs visualisation data\n");
+        printf("calibtool -ahrsdump (-q)\n\tOutputs visualisation data\n");
         exit(0);
     }
 
@@ -90,22 +90,26 @@ int main(int argc, char** argv)
                 // first let's calibrate the gyro at rest.
                 cal.PerformGyroCalibration();
 
+                // next let's calibrate the accelerometer at rest.
+                cal.PerformAccelerometerCalibration();
+
                 // Now the magnetometer.
                 cal.PerformMagnetometerCalibration();
 
                 printf("Calibration complete. Final calibration data:\n");
                 printf(fmt::format("Gyro Zero Rate Offset: x={}, y={}, z={}\n", cal.GetGyroCalibration().x, cal.GetGyroCalibration().y, cal.GetGyroCalibration().z).c_str());
+                printf(fmt::format("Accel Zero Rate Offset: x={}, y={}, z={}\n", cal.GetAccelerometerCalibration().x, cal.GetAccelerometerCalibration().y, cal.GetAccelerometerCalibration().z).c_str());
                 printf(fmt::format("Magnetometer Hard Iron Offset: x={}, y={}, z={}\n", cal.GetMagnetometerCalibration().x, cal.GetMagnetometerCalibration().y, cal.GetMagnetometerCalibration().z).c_str());
             }
             else if (args[0] == "-ahrsdump") {
-                bool useQuarternions = args.size() > 1 && args[1] == "-q";
-                printf(fmt::format("Dumping ahrs data in {} format to /dev/ttyS0.\n", useQuarternions ? "Quarternion" : "Euler angle").c_str());
+                bool useQuaternions = args.size() > 1 && args[1] == "-q";
+                printf(fmt::format("Dumping ahrs data in {} format to /dev/ttyS0.\n", useQuaternions ? "Quaternion" : "Euler angle").c_str());
                 printf("Press ENTER to continue. Press ENTER to then stop\n");
                 getchar();
 
                 std::atomic_bool stopDump;
                 stopDump.store(false);
-                std::thread dumpThread([&stopDump] () {
+                std::thread dumpThread([&stopDump, useQuaternions] () {
                     auto ahrsDataSource = utility::Register::Factory().CreateAHRSDataSource();
 
                     auto pSerialLogger = utility::Register::LoggerFactory().CreateLogger("SerialLogger");
@@ -113,8 +117,15 @@ int main(int argc, char** argv)
 
                     while (stopDump == false)
                     {
-                        auto currOrientation = ahrsDataSource->ReadOrientation();
-                        auto datum = fmt::format("Orientation: {:3.2f}, {:3.2f}, {:3.2f}\n", currOrientation.GetRollInDegrees(), currOrientation.GetPitchInDegrees(), currOrientation.GetYawInDegrees());
+                        auto currOriQ = ahrsDataSource->ReadOrientation();
+                        std::string datum;
+                        if (!useQuaternions) {
+                            auto currOrientation = currOriQ.ToEuler();
+                            datum = fmt::format("Orientation: {:3.2f}, {:3.2f}, {:3.2f}\n", currOrientation.GetRollInDegrees(), currOrientation.GetPitchInDegrees(), currOrientation.GetYawInDegrees());
+                        } else {
+                            datum = fmt::format("Quaternion: {:3.2f}, {:3.2f}, {:3.2f}, {:3.2f}\n", currOriQ.w, currOriQ.x, currOriQ.y, currOriQ.z);
+                        }
+                        
                         serialDevice.Write((char*)datum.c_str(), datum.size());
                         std::this_thread::sleep_for(std::chrono::milliseconds(200));
                     }                

@@ -79,7 +79,7 @@ namespace sbrcontroller {
             if (numBytesRead < 0) {
                 throw errorhandling::ComsException(fmt::format("Error {:d} from read: {}", errno, strerror(errno)));
             }
-            m_pLogger->info("read {} bytes from serial port: {}", numBytesRead, std::string(bufferToRead, numBytesRead));
+            m_pLogger->debug("read {} bytes from serial port: {}", numBytesRead, std::string(bufferToRead, numBytesRead));
             return numBytesRead;
         }
 
@@ -89,7 +89,7 @@ namespace sbrcontroller {
             if (numBytesWritten < 0) {
                 throw errorhandling::ComsException(fmt::format("Error {:d} from write: {}", errno, strerror(errno)));
             }
-            m_pLogger->info("wrote {} bytes to serial port: {}", numBytesWritten, std::string(bufferToWrite, numBytesWritten));
+            m_pLogger->debug("wrote {} bytes to serial port: {}", numBytesWritten, std::string(bufferToWrite, numBytesWritten));
             return numBytesWritten;
         }
 

@@ -28,6 +28,8 @@ namespace sbrcontroller {
                     throw errorhandling::InvalidDeviceException(fmt::format("Expected id {:0x} but received id {:0x}", (int)FXOS8700_ID, id));
                 }
 
+                m_pLogger->debug("Using Hard Iron Offset {}, {}, {}", m_hardIronOffset.x, m_hardIronOffset.y, m_hardIronOffset.z);
+
                 // Configure the magnetometer
                 // Hybrid Mode, Over Sampling Rate = 16
                 m_pFXOS8700->WriteReg8(FXOS8700_REGISTER_MCTRL_REG1, 0x1F);
@@ -51,7 +53,7 @@ namespace sbrcontroller {
 
             void FXOS8700Mag::ClearCalibration()
             {
-                m_hardIronOffset = {};
+                m_hardIronOffset = {0.0};
             }
             
             int FXOS8700Mag::ReadSensorData(unsigned char* buffer, unsigned int length)

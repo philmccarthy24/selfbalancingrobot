@@ -13,24 +13,26 @@ namespace calibtool {
 
     Calibration::Calibration(const std::vector<std::shared_ptr<sbrcontroller::sensors::ISensor>>& sensors)
     {
-        auto sensorIter = std::find_if(sensors.begin(), sensors.end(), [&] (const std::shared_ptr<sbrcontroller::sensors::ISensor>& item) {
-            return item->GetDeviceInfo().sensorType == sbrcontroller::sensors::ESensorType::Gyroscope;
-        });
-        if (sensorIter == sensors.end())
-            throw std::runtime_error("Can't identify gyro");
-        m_pGyroToCalibrate = *sensorIter;
-        sensorIter = std::find_if(sensors.begin(), sensors.end(), [&] (const std::shared_ptr<sbrcontroller::sensors::ISensor>& item) {
-            return item->GetDeviceInfo().sensorType == sbrcontroller::sensors::ESensorType::Magnetometer;
-        });
-        if (sensorIter == sensors.end())
-            throw std::runtime_error("Can't identify magnetometer");
-        m_pMagnetometerToCalibrate = *sensorIter;
+        m_pGyroToCalibrate = GetSensorByType(sensors, sbrcontroller::sensors::ESensorType::Gyroscope);
+        m_pAccelerometerToCalibrate = GetSensorByType(sensors, sbrcontroller::sensors::ESensorType::Accelerometer);
+        m_pMagnetometerToCalibrate = GetSensorByType(sensors, sbrcontroller::sensors::ESensorType::Magnetometer);
         m_pGyroToCalibrate->ClearCalibration();
+        m_pAccelerometerToCalibrate->ClearCalibration();
         m_pMagnetometerToCalibrate->ClearCalibration();
     }
 
     Calibration::~Calibration()
     {
+    }
+
+    std::shared_ptr<sbrcontroller::sensors::ISensor> Calibration::GetSensorByType(const std::vector<std::shared_ptr<sbrcontroller::sensors::ISensor>>& sensors, sbrcontroller::sensors::ESensorType sensorType)
+    {
+        auto sensorIter = std::find_if(sensors.begin(), sensors.end(), [&] (const std::shared_ptr<sbrcontroller::sensors::ISensor>& item) {
+            return item->GetDeviceInfo().sensorType == sensorType;
+        });
+        if (sensorIter == sensors.end())
+            throw std::runtime_error("Can't identify sensor of specified type");
+        return *sensorIter;
     }
 
     void Calibration::PerformGyroCalibration()
@@ -63,6 +65,41 @@ namespace calibtool {
             m_zeroRateOffset.z = (minZ + maxZ) / 2;
 
             printf(fmt::format("Zero Rate Offset: x={}, y={}, z={}\n", m_zeroRateOffset.x, m_zeroRateOffset.y, m_zeroRateOffset.z).c_str());
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+    }
+
+    void Calibration::PerformAccelerometerCalibration()
+    {
+        printf("Accelerometer calibration\n");
+        printf("Place your accelerometer on a FLAT stable surface\n");
+        printf("Press ENTER to continue");
+        getchar();
+
+        sbrcontroller::sensors::TripleAxisData accelReading = {};
+        float minX = 0, maxX = 0;
+        float minY = 0, maxY = 0;
+        float minZ = 0, maxZ = 0;
+
+        for (int i = 0; i < 500; i++)
+        {
+            m_pAccelerometerToCalibrate->ReadSensorData(reinterpret_cast<unsigned char*>(&accelReading), sizeof(sbrcontroller::sensors::TripleAxisData));
+
+            printf(fmt::format("Accel: x={}, y={}, z={}\n", accelReading.x, accelReading.y, accelReading.z).c_str());
+
+            minX = std::min(minX, accelReading.x);
+            minY = std::min(minY, accelReading.y);
+            minZ = std::min(minZ, accelReading.z - 1.0f);
+            maxX = std::max(maxX, accelReading.x);
+            maxY = std::max(maxY, accelReading.y);
+            maxZ = std::max(maxZ, accelReading.z - 1.0f);
+
+            m_accelZeroRateOffset.x = (minX + maxX) / 2;
+            m_accelZeroRateOffset.y = (minY + maxY) / 2;
+            m_accelZeroRateOffset.z = (minZ + maxZ) / 2;
+
+            printf(fmt::format("Zero Rate Offset: x={}, y={}, z={}\n", m_accelZeroRateOffset.x, m_accelZeroRateOffset.y, m_accelZeroRateOffset.z).c_str());
 
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
@@ -117,6 +154,11 @@ namespace calibtool {
     const sbrcontroller::sensors::TripleAxisData& Calibration::GetGyroCalibration()
     {
         return m_zeroRateOffset;
+    }
+
+    const sbrcontroller::sensors::TripleAxisData& Calibration::GetAccelerometerCalibration()
+    {
+        return m_accelZeroRateOffset;
     }
 
     const sbrcontroller::sensors::TripleAxisData& Calibration::GetMagnetometerCalibration()

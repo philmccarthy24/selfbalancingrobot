@@ -230,7 +230,7 @@ volatile float integralFBx = 0.0f,  integralFBy = 0.0f, integralFBz = 0.0f;	// i
 			q3 *= recipNorm;
 		}
 
-		std::future<Quarternion> Mahony::ReadFusedSensorDataAsync()
+		std::future<Quaternion> Mahony::ReadFusedSensorDataAsync()
 		{
 
 		}

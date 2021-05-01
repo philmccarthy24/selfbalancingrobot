@@ -51,7 +51,7 @@ namespace sbrcontroller {
                     std::shared_ptr<coms::II2CDevice> m_pFXAS2100;
                     std::shared_ptr<spdlog::logger> m_pLogger;
 
-                    ERange m_currentRange;
+                    float m_unitScale;
 
                     sbrcontroller::sensors::TripleAxisData m_calibrationOffsets;
 

@@ -31,10 +31,11 @@ namespace sbrcontroller
                 std::shared_ptr<spdlog::logger> pLogger);
             virtual ~AHRSManager();
 
-            virtual Ori3DRads ReadOrientation() override;
+            virtual Quaternion ReadOrientation() override;
 
         private:
             void SensorFusionThreadProc();
+            void SetRealtimePriority();
 
             std::thread m_tSensorFusionThread;
 

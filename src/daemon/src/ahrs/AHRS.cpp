@@ -31,11 +31,16 @@ namespace sbrcontroller
             return UnitConvertor::ToDegrees(yaw);
         }
 
-        Ori3DRads Quarternion::ToEuler() 
+        Ori3DRads Quaternion::ToEuler() 
         {
-            // convert quarternion to orientation (euler angles)
+            // convert Quaternion to orientation (euler angles)
             Ori3DRads angles;
 
+            angles.roll = atan2f(w*x + y*z, 0.5f - x*x - y*y);
+            angles.pitch = asinf(-2.0f * (x*z - w*y));
+            angles.yaw = atan2f(x*y + w*z, 0.5f - y*y - z*z);
+
+/*
             // roll (x-axis rotation)
             double sinr_cosp = 2 * (w * x + y * z);
             double cosr_cosp = 1 - 2 * (x * x + y * y);
@@ -52,6 +57,7 @@ namespace sbrcontroller
             double siny_cosp = 2 * (w * z + x * y);
             double cosy_cosp = 1 - 2 * (y * y + z * z);
             angles.yaw = std::atan2(siny_cosp, cosy_cosp);
+*/
 
             return angles;
         }

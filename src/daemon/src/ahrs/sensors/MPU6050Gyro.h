@@ -26,7 +26,7 @@ namespace sbrcontroller {
              * 
              * Note this code gets raw data from sensor registers. Using the DMP chip via 
              * the FIFO would be a better choice because it has processing/filtering built in 
-             * (returning quarternions that can be converted to pitch/roll/yaw), however 
+             * (returning Quaternions that can be converted to pitch/roll/yaw), however 
              * reading to a buffer over I2C using WiringPi isn't currently available.
              * Jeff Rowland's MPU6050/DMP code has been ported to older Pis via the 
              * bcm2835 lib, but the i2c lib that uses it (or bcm2835) is broken on Pi4.

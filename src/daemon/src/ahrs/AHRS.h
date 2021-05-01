@@ -26,7 +26,7 @@ namespace sbrcontroller
             float GetYawInDegrees() const;
         };
 
-        struct Quarternion {
+        struct Quaternion {
             float w;
             float x;
             float y;
@@ -39,7 +39,7 @@ namespace sbrcontroller
         public:
             IAHRSDataSource() {}
             virtual ~IAHRSDataSource() {}
-            virtual Ori3DRads ReadOrientation() = 0;
+            virtual Quaternion ReadOrientation() = 0;
         };
 
     }

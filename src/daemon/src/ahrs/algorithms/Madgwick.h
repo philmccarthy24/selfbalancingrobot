@@ -18,6 +18,7 @@
 #pragma once
 #include "IAHRSFusionAlgorithm.h"
 #include "AHRS.h"
+#include <atomic>
 
 namespace sbrcontroller {
     namespace ahrs {
@@ -26,24 +27,24 @@ namespace sbrcontroller {
             class Madgwick : public IAHRSFusionAlgorithm
             {
             public:
-                Madgwick(float sampleFreq, float betaDef = 0.1f);
+                Madgwick(float sampleFreq, float betaDef = 0.75f); // 0.1 was default // I tried 0.05 but this wasn't much better. nor was 0.75
                 ~Madgwick();
 
                 virtual bool IsHardwareImplementation() override;
                 virtual void Update(const sensors::TripleAxisData& gyroData, const sensors::TripleAxisData& accelData, const sensors::TripleAxisData& magData) override;
                 virtual void UpdateIMU(const sensors::TripleAxisData& gyroData, const sensors::TripleAxisData& accelData) override;
 
-                virtual std::future<Quarternion> ReadFusedSensorDataAsync() override;
+                virtual std::future<Quaternion> ReadFusedSensorDataAsync() override;
 
             private:
                 float invSqrt(float x);
 
                 volatile float beta;	// algorithm gain, default   0.1f	(2 * proportional gain);
                 float m_fSampleFreqHz;
-                volatile Quarternion m_q;	// quaternion of sensor frame relative to auxiliary frame
-                Quarternion m_qOut;
-                std::promise<Quarternion> m_readingPromise;
-                volatile bool m_bSignalRequestReading;
+                volatile Quaternion m_q;	// quaternion of sensor frame relative to auxiliary frame
+                Quaternion m_qOut;
+                std::promise<Quaternion> m_readingPromise;
+                std::atomic_bool m_bSignalRequestReading;
             };
         }
     }
