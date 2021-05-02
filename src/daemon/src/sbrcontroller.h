@@ -13,6 +13,7 @@ namespace sbrcontroller {
     static const std::string LOGGING_SINKS_KEY = "/logging/sinks";
     static const std::string LOGGING_LOGGERS_KEY = "/logging/loggers";
     static const std::string MOTOR_CONTROL_COMS_KEY = "/motorControl/coms";
+    static const std::string MOTOR_CONTROL_MOTORS_KEY = "/motorControl/motors";
 
     // engineering constants
 

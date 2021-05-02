@@ -92,6 +92,22 @@ namespace sbrcontroller {
                 // TODO: What about notifying things about config change?
             }
 
+            virtual std::shared_ptr<IConfigSection> GetConfigSection(const std::string& configKey) const override
+            {
+                std::shared_ptr<IConfigSection> configSection;
+                auto jp = json::json_pointer(configKey);
+                auto configSectionJSON = m_cachedConfig[jp];
+                if (configSectionJSON.is_object()) {
+                    // note we need to do a const_pointer_cast because this method is const, so the this ptr is const.
+                    configSection = std::dynamic_pointer_cast<IConfigSection>(
+                        std::make_shared<JSONObjectPointer>(std::const_pointer_cast<JSONConfigImpl>(shared_from_this()), configKey + "/")                        
+                    );
+                } else {
+                    throw errorhandling::ParseException("Expected config section to be an object");
+                }
+                return configSection;
+            }
+
             virtual std::vector<std::shared_ptr<IConfigSection>> GetConfigSections(const std::string& configKey) const override
             {
                 auto jp = json::json_pointer(configKey);
@@ -154,6 +170,11 @@ namespace sbrcontroller {
                 m_pParent->SetConfigValue(m_objPath + configKey, configValue);
             }
 
+            virtual std::shared_ptr<IConfigSection> GetConfigSection(const std::string& configKey) const override
+            {
+                return m_pParent->GetConfigSection(m_objPath + configKey);
+            }
+
             virtual std::vector<std::shared_ptr<IConfigSection>> GetConfigSections(const std::string& configKey) const override
             {
                 return m_pParent->GetConfigSections(m_objPath + configKey);
@@ -191,6 +212,11 @@ namespace sbrcontroller {
         void JSONConfig::SetConfigValue(const std::string& configKey, const std::string& configValue)
         {
             m_pImpl->SetConfigValue(configKey, configValue);
+        }
+
+        std::shared_ptr<IConfigSection> JSONConfig::GetConfigSection(const std::string& configKey) const
+        {
+            return m_pImpl->GetConfigSection(configKey);
         }
 
         std::vector<std::shared_ptr<IConfigSection>> JSONConfig::GetConfigSections(const std::string& configKey) const 

@@ -4,9 +4,10 @@ set(coms_files
   LinuxI2CDevice.cpp
   WiringPiWrapper.h
   WiringPiWrapper.cpp
-  IDataDevice.h
+  ISerialDevice.h
   LinuxSerialDevice.h
   LinuxSerialDevice.cpp
+  IStringReaderWriter.h
   StringReaderWriter.h
   StringReaderWriter.cpp
 )

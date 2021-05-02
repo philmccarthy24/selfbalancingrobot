@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include "IDataDevice.h"
+#include "ISerialDevice.h"
 
 namespace spdlog {
     class logger;
@@ -9,7 +9,7 @@ namespace spdlog {
 namespace sbrcontroller {
     namespace coms {
 
-        class LinuxSerialDevice : public IDataDevice
+        class LinuxSerialDevice : public ISerialDevice
         {
         public:
             LinuxSerialDevice(std::shared_ptr<spdlog::logger> pLogger, const std::string& serialDeviceName, int baudRate = 115200);

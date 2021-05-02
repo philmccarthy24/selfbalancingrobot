@@ -1,5 +1,5 @@
 #include "StringReaderWriter.h"
-#include "IDataDevice.h"
+#include "ISerialDevice.h"
 #include "sbrcontroller.h"
 #include <fmt/core.h>
 #include <chrono>
@@ -10,13 +10,13 @@ namespace sbrcontroller {
         // m_pReadHead is where the read buffer starts
         // m_pReadTail points to the end of the last buffered byte of data
 
-        StringReaderWriter::StringReaderWriter(std::shared_ptr<IDataDevice> pDataDevice) :
-            StringReaderWriter(pDataDevice, DEFAULT_READ_BUFFER_SZ, DEFAULT_IO_TIMEOUT_MS)
+        StringReaderWriter::StringReaderWriter(std::shared_ptr<ISerialDevice> pSerialDevice) :
+            StringReaderWriter(pSerialDevice, DEFAULT_READ_BUFFER_SZ, DEFAULT_IO_TIMEOUT_MS)
         {
         }
 
-        StringReaderWriter::StringReaderWriter(std::shared_ptr<IDataDevice> pDataDevice, int readBufferSize, int ioTimeoutMS) :
-            m_pDataDevice(pDataDevice),
+        StringReaderWriter::StringReaderWriter(std::shared_ptr<ISerialDevice> pSerialDevice, int readBufferSize, int ioTimeoutMS) :
+            m_pSerialDevice(pSerialDevice),
             READ_BUFFER_SZ(readBufferSize),
             IO_TIMEOUT_MS(ioTimeoutMS)
         {
@@ -64,7 +64,7 @@ namespace sbrcontroller {
                             // exhausted buffer, reset to beginning
                             m_pReadHead = m_pReadTail = &m_readBuffer[0];
                         }
-                        int bytesRead = m_pDataDevice->Read(m_pReadTail, pEndBuf - m_pReadTail);
+                        int bytesRead = m_pSerialDevice->Read(m_pReadTail, pEndBuf - m_pReadTail);
                         m_pReadTail += bytesRead;
                         // check elapsed time
                         auto currentReadTP = std::chrono::system_clock::now();
@@ -87,7 +87,7 @@ namespace sbrcontroller {
             int numBytesToWrite = writeBuf.size();
             int numBytesLeftToWrite = numBytesToWrite;
             while (numBytesLeftToWrite > 0) {
-                numBytesLeftToWrite -= m_pDataDevice->Write(&writeBuf[numBytesToWrite - numBytesLeftToWrite], numBytesLeftToWrite);
+                numBytesLeftToWrite -= m_pSerialDevice->Write(&writeBuf[numBytesToWrite - numBytesLeftToWrite], numBytesLeftToWrite);
                 // check elapsed time
                 auto currentWriteTP = std::chrono::system_clock::now();
                 auto msDuration = std::chrono::duration_cast<std::chrono::milliseconds>(currentWriteTP-startWriteTP);

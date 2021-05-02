@@ -1,4 +1,5 @@
 #pragma once
+#include "IStringReaderWriter.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -6,23 +7,23 @@
 namespace sbrcontroller {
     namespace coms {
 
-        class IDataDevice;
+        class ISerialDevice;
 
-        class StringReaderWriter
+        class StringReaderWriter : public IStringReaderWriter
         {
         public:
-            StringReaderWriter(std::shared_ptr<IDataDevice> pDataDevice);
-            StringReaderWriter(std::shared_ptr<IDataDevice> pDataDevice, int readBufferSize, int ioTimeoutMS);
+            StringReaderWriter(std::shared_ptr<ISerialDevice> pSerialDevice);
+            StringReaderWriter(std::shared_ptr<ISerialDevice> pSerialDevice, int readBufferSize, int ioTimeoutMS);
             virtual ~StringReaderWriter();
 
-            virtual std::string Read(char untilChar = '\n');
-            virtual void Write(const std::string& asciiMessage);
+            virtual std::string Read(char untilChar = '\n') override;
+            virtual void Write(const std::string& asciiMessage) override;
 
         private:
             bool IsUnderflowed();
             void HandleUnderflow();
 
-            std::shared_ptr<IDataDevice> m_pDataDevice;
+            std::shared_ptr<ISerialDevice> m_pSerialDevice;
 
             std::vector<char> m_readBuffer;
             static const int DEFAULT_READ_BUFFER_SZ = 8192;

@@ -27,7 +27,7 @@ namespace sbrcontroller {
             class Madgwick : public IAHRSFusionAlgorithm
             {
             public:
-                Madgwick(float sampleFreq, float betaDef = 0.75f); // 0.1 was default // I tried 0.05 but this wasn't much better. nor was 0.75
+                Madgwick(float sampleFreq, float betaConst);
                 ~Madgwick();
 
                 virtual bool IsHardwareImplementation() override;

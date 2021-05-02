@@ -16,6 +16,7 @@ namespace sbrcontroller {
             virtual std::vector<std::string> GetConfigListValue(const std::string& configKey) const override;
             virtual void SetConfigValue(const std::string& configKey, const std::string& configValue) override;
 
+            virtual std::shared_ptr<IConfigSection> GetConfigSection(const std::string& configKey) const override;
             virtual std::vector<std::shared_ptr<IConfigSection>> GetConfigSections(const std::string& configKey) const override;
 
         private:

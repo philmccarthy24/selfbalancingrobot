@@ -23,8 +23,8 @@ namespace sbrcontroller {
 	namespace ahrs {
 		namespace algorithms {
 
-			Madgwick::Madgwick(float sampleFreq, float betaDef) :
-				beta(betaDef),
+			Madgwick::Madgwick(float sampleFreq, float betaConst) :
+				beta(betaConst),
 				m_fSampleFreqHz(sampleFreq),
 				m_q{1.0f, 0.0f, 0.0f, 0.0f},
 				m_qOut{}

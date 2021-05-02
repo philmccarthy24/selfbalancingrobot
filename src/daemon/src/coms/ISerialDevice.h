@@ -5,11 +5,11 @@
 namespace sbrcontroller {
     namespace coms {
 
-        class IDataDevice
+        class ISerialDevice
         {
         public:
-            IDataDevice() {}
-            virtual ~IDataDevice() {}
+            ISerialDevice() {}
+            virtual ~ISerialDevice() {}
 
             virtual int Read(char* bufferToRead, int bufLen) const = 0;
             virtual int Write(char* bufferToWrite, int bufLen) const = 0;

@@ -1,6 +1,9 @@
 {
     "ahrs": {
-        "fusionAlgorithm": "Madgwick",
+        "fusionAlgorithm": {
+            "id": "Madgwick",
+            "beta": 0.75
+        },
         "sensorSampleRateHz": 100,
         "sensors": [
             {

@@ -4,6 +4,7 @@
 #include "SBRProdFactory.h"
 #include "LoggerFactory.h"
 #include "AHRS.h"
+#include "IMotorController.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/stopwatch.h"
 #include <iostream>
@@ -38,6 +39,12 @@ int main()
             logger->info("SBRController running!");
 
             // more setup code here... TODO
+            {
+                auto pMotorController = pFactory->CreateMotorController();
+                pMotorController->SetMotorVelocity("left", 3.0);
+                pMotorController->SetMotorVelocity("right", 3.0);
+                std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+            }
 
             printf("Press Return to quit\n");  
             getchar();

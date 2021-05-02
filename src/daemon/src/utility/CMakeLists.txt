@@ -71,8 +71,9 @@ set(utility_includes
 ../ahrs/sensors
 ../ahrs/algorithms
 ../coms
+../motor
 )
 
-target_link_libraries(utility PRIVATE nlohmann_json::nlohmann_json coms ahrs fmt::fmt spdlog)
+target_link_libraries(utility PRIVATE nlohmann_json::nlohmann_json coms ahrs motor fmt::fmt spdlog)
 #target_link_libraries(utility INTERFACE fmt::fmt-header-only)
 target_include_directories(utility PRIVATE ${utility_includes})

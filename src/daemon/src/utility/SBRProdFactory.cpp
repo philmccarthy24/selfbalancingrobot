@@ -11,12 +11,16 @@
 #include "FXOS8700Accel.h"
 #include "FXOS8700Mag.h"
 #include "LinuxI2CDevice.h"
+#include "LinuxSerialDevice.h"
+#include "StringReaderWriter.h"
 #include "GCodeChecksumCalc.h"
+#include "ODriveController.h"
 #include "ILoggerFactory.h"
 
 using namespace sbrcontroller::sensors;
 using namespace sbrcontroller::coms;
 using namespace sbrcontroller::ahrs;
+using namespace sbrcontroller::motor;
 using namespace sbrcontroller::ahrs::sensors;
 using namespace std;
 
@@ -34,6 +38,12 @@ namespace sbrcontroller {
         std::shared_ptr<II2CDevice> SBRProdFactory::CreateI2CDevice(int deviceId) const
         {
             return std::make_shared<LinuxI2CDevice>(deviceId);
+        }
+
+        std::shared_ptr<ISerialDevice> SBRProdFactory::CreateSerialDevice(const std::string& serialDeviceName, int baudRate) const
+        {
+            auto pLogger = Register::LoggerFactory().CreateLogger("LinuxSerialDevice");
+            return std::make_shared<LinuxSerialDevice>(pLogger, serialDeviceName, baudRate);
         }
 
         std::shared_ptr<ahrs::IAHRSDataSource> SBRProdFactory::CreateAHRSDataSource() const
@@ -58,15 +68,17 @@ namespace sbrcontroller {
             std::shared_ptr<ahrs::algorithms::IAHRSFusionAlgorithm> pFusionAlgorithm = nullptr;
             int sensorSamplePeriodHz = std::stoi(Register::Config().GetConfigValue(AHRS_SENSOR_SAMPLE_RATE_CONFIG_KEY));
 
-            auto selectedFusionAlgorithm = Register::Config().GetConfigValue(AHRS_FUSION_ALGORITHM_CONFIG_KEY);
+            auto fusionAlgorithmConfig = Register::Config().GetConfigSection(AHRS_FUSION_ALGORITHM_CONFIG_KEY);
+            auto algorithmIdentifier = fusionAlgorithmConfig->GetConfigValue("id");
 
-            if (selectedFusionAlgorithm == "Madgwick")
+            if (algorithmIdentifier == "Madgwick")
             {
-                pFusionAlgorithm = make_shared<ahrs::algorithms::Madgwick>(sensorSamplePeriodHz);
+                float betaConstant = std::stof(fusionAlgorithmConfig->GetConfigValue("beta"));
+                pFusionAlgorithm = make_shared<ahrs::algorithms::Madgwick>(sensorSamplePeriodHz, betaConstant);
             }
             else
             {
-                throw errorhandling::NotImplementedException("Code does not yet exist to create algorithm " + selectedFusionAlgorithm + " specified.");
+                throw errorhandling::NotImplementedException("Code does not yet exist to create algorithm " + algorithmIdentifier + " specified.");
             }
             return pFusionAlgorithm;
         }
@@ -77,21 +89,21 @@ namespace sbrcontroller {
             std::shared_ptr<ISensor> pSensor = nullptr;
             if (sensorId == "FXAS2100_gyro") {
                 // get the stored calibration
-                auto calConfig = sensorConfig->GetConfigSections("calibration")[0];
+                auto calConfig = sensorConfig->GetConfigSection("calibration");
                 auto calData = GetCalibrationData(calConfig);
                 auto pI2CDevice = CreateI2CDevice(FXAS2100Gyro::I2C_ADDR);
                 auto pLogger = Register::LoggerFactory().CreateLogger("FXAS2100Gyro");
                 pSensor = std::make_shared<FXAS2100Gyro>(pI2CDevice, calData, pLogger);
             } else if (sensorId == "FXOS8700_accel") {
                 // get the stored calibration
-                auto calConfig = sensorConfig->GetConfigSections("calibration")[0];
+                auto calConfig = sensorConfig->GetConfigSection("calibration");
                 auto calData = GetCalibrationData(calConfig);
                 auto pI2CDevice = CreateI2CDevice(FXOS8700Accel::I2C_ADDR);
                 auto pLogger = Register::LoggerFactory().CreateLogger("FXOS8700Accel");
                 pSensor = std::make_shared<FXOS8700Accel>(pI2CDevice, calData, pLogger);
             } else if (sensorId == "FXOS8700_mag") {
                 // get the stored hard iron offset
-                auto calConfig = sensorConfig->GetConfigSections("calibration")[0];
+                auto calConfig = sensorConfig->GetConfigSection("calibration");
                 auto calData = GetCalibrationData(calConfig);
                 auto pI2CDevice = CreateI2CDevice(FXOS8700Mag::I2C_ADDR);
                 auto pLogger = Register::LoggerFactory().CreateLogger("FXOS8700Mag");
@@ -121,6 +133,28 @@ namespace sbrcontroller {
         std::shared_ptr<IChecksumCalculator> SBRProdFactory::CreateChecksumCalculator() const
         {
             return std::make_shared<GCodeChecksumCalc>();
+        }
+
+        std::shared_ptr<IStringReaderWriter> SBRProdFactory::CreateStringReaderWriter(std::shared_ptr<coms::ISerialDevice> pSerialDevice) const
+        {
+            return std::make_shared<coms::StringReaderWriter>(pSerialDevice);
+        }
+
+        std::shared_ptr<IMotorController> SBRProdFactory::CreateMotorController() const
+        {
+            auto motorControlComsConfigSection = utility::Register::Config().GetConfigSection(MOTOR_CONTROL_COMS_KEY);
+            if (motorControlComsConfigSection->GetConfigValue("type") != "serial") 
+                throw errorhandling::ConfigurationException("Expecting serial port setup info in motor control coms section");
+
+            auto serialPort = motorControlComsConfigSection->GetConfigValue("serialPort");
+            int baudRate = std::stoi(motorControlComsConfigSection->GetConfigValue("baud"));
+            
+            auto pRawSerial = CreateSerialDevice(serialPort, baudRate);
+            auto pStringReaderWriter = CreateStringReaderWriter(pRawSerial);
+            auto pChecksumCalculator = CreateChecksumCalculator();
+        
+            auto motorConfigSections = utility::Register::Config().GetConfigSections(MOTOR_CONTROL_MOTORS_KEY);
+            return std::make_shared<ODriveController>(pStringReaderWriter, pChecksumCalculator, motorConfigSections);
         }
 
     }

@@ -19,6 +19,7 @@ namespace sbrcontroller {
             virtual void SetConfigValue(const std::string& configKey, const std::string& configValue) = 0;
 
             // gets sub-sections of config
+            virtual std::shared_ptr<IConfigSection> GetConfigSection(const std::string& configKey) const = 0;
             virtual std::vector<std::shared_ptr<IConfigSection>> GetConfigSections(const std::string& configKey) const = 0;
         };
     }
