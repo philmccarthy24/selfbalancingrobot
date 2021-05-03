@@ -1,7 +1,7 @@
 #include "LoggerFactory.h"
 #include "Register.h"
 #include "IConfigSection.h"
-#include "sbrcontroller.h"
+#include "SBRCommon.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/async.h"
 #include "spdlog/sinks/stdout_color_sinks.h"

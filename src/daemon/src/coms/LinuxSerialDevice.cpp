@@ -1,5 +1,5 @@
 #include "LinuxSerialDevice.h"
-#include "sbrcontroller.h"
+#include "SBRCommon.h"
 #include "spdlog/spdlog.h"
 #include <cstring>
 #include <algorithm>

@@ -1,7 +1,7 @@
 #ifdef USING_WIRING_PI
 
 #include "WiringPiWrapper.h"
-#include "sbrcontroller.h"
+#include "SBRCommon.h"
 #include "wiringPiI2C.h"
 
 namespace sbrcontroller {

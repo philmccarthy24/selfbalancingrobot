@@ -1,5 +1,5 @@
 #include "GCodeChecksumCalc.h"
-#include "sbrcontroller.h"
+#include "SBRCommon.h"
 #include <gtest/gtest.h>
 #include <memory>
 

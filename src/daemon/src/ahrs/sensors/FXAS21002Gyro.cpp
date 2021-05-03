@@ -1,6 +1,6 @@
 #include "FXAS21002Gyro.h"
 #include "II2CDevice.h"
-#include "sbrcontroller.h"
+#include "SBRCommon.h"
 #include "AHRS.h"
 #include "spdlog/spdlog.h"
 #include <fmt/core.h>

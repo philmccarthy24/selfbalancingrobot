@@ -2,7 +2,7 @@
 #include "II2CDevice.h"
 #include "AHRS.h"
 #include "spdlog/spdlog.h"
-#include "sbrcontroller.h"
+#include "SBRCommon.h"
 #include <cmath>
 #include <stdexcept>
 #include <chrono>

@@ -1,5 +1,5 @@
 #include "JSONConfig.h"
-#include "sbrcontroller.h"
+#include "SBRCommon.h"
 #include <fmt/core.h>
 #include <nlohmann/json.hpp>
 #include <memory>

@@ -2,7 +2,7 @@
 #include "IStringReaderWriter.h"
 #include "IChecksumCalculator.h"
 #include "IConfigSection.h"
-#include "sbrcontroller.h"
+#include "SBRCommon.h"
 #include <fmt/core.h>
 #include <memory>
 #include <map>

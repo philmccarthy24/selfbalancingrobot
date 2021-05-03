@@ -1,7 +1,7 @@
 #include "AHRSManager.h"
 #include "AHRS.h"
 #include "IAHRSFusionAlgorithm.h"
-#include "sbrcontroller.h"
+#include "SBRCommon.h"
 #include "sensors.h"
 #include "spdlog/spdlog.h"
 #include <chrono>

@@ -2,7 +2,7 @@
 #include "AHRSManager.h"
 #include "Register.h"
 #include "IConfigSection.h"
-#include "sbrcontroller.h"
+#include "SBRCommon.h"
 #include "sensors.h"
 #include "Madgwick.h"
 #include "MPU6050Accel.h"

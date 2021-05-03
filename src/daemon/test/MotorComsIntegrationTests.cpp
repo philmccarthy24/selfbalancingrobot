@@ -4,7 +4,7 @@
 #include "SBRProdFactory.h"
 #include "LoggerFactory.h"
 #include "AHRS.h"
-#include "sbrcontroller.h"
+#include "SBRCommon.h"
 #include "LinuxSerialDevice.h"
 #include "StringReaderWriter.h"
 #include "IChecksumCalculator.h"

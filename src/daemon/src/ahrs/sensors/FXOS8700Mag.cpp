@@ -1,7 +1,7 @@
 #include "FXOS8700Mag.h"
 #include "II2CDevice.h"
 #include "AHRS.h"
-#include "sbrcontroller.h"
+#include "SBRCommon.h"
 #include "spdlog/spdlog.h"
 #include <cmath>
 #include <stdexcept>

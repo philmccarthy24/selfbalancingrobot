@@ -4,7 +4,7 @@ add_subdirectory(utility)
 add_subdirectory(motor)
 
 set(header_files
-    sbrcontroller.h
+    SBRCommon.h
     sensors.h
     ahrs/AHRS.h
     ahrs/AHRSManager.h

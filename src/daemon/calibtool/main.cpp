@@ -1,7 +1,7 @@
 #include "Register.h"
 #include "FileConfigProvider.h"
 #include "JSONConfig.h"
-#include "sbrcontroller.h"
+#include "SBRCommon.h"
 #include "SBRProdFactory.h"
 #include "LoggerFactory.h"
 #include "Calibration.h"

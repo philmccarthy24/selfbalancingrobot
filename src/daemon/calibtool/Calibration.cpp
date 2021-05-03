@@ -1,6 +1,6 @@
 #include "Calibration.h"
 #include "JSONConfig.h"
-#include "sbrcontroller.h"
+#include "SBRCommon.h"
 #include <algorithm>
 #include <chrono>
 #include <thread>

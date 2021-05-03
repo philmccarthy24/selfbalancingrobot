@@ -41,8 +41,8 @@ int main()
             // more setup code here... TODO
             {
                 auto pMotorController = pFactory->CreateMotorController();
-                pMotorController->SetMotorVelocity("left", 3.0);
-                pMotorController->SetMotorVelocity("right", 3.0);
+                pMotorController->SetMotorVelocity("left", 10.0);
+                pMotorController->SetMotorVelocity("right", 10.0);
                 std::this_thread::sleep_for(std::chrono::milliseconds(5000));
             }
 

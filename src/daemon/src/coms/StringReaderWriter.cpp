@@ -1,6 +1,6 @@
 #include "StringReaderWriter.h"
 #include "ISerialDevice.h"
-#include "sbrcontroller.h"
+#include "SBRCommon.h"
 #include <fmt/core.h>
 #include <chrono>
 
