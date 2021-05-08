@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <thread>
+#include <mutex>
 #include <atomic>
 
 namespace spdlog {
@@ -22,6 +23,8 @@ namespace sbrcontroller
             class IAHRSFusionAlgorithm;
         }
 
+        struct RegisterEntry;
+
         class AHRSManager : public IAHRSDataSource
         {
         public:
@@ -31,13 +34,17 @@ namespace sbrcontroller
                 std::shared_ptr<spdlog::logger> pLogger);
             virtual ~AHRSManager();
 
-            virtual Quaternion ReadOrientation() override;
+            virtual void Register(const std::string& channel, std::weak_ptr<IAHRSDataSubscriber> pSubscriber, int updateDeltaMS) = 0;
+            virtual void Unregister(const std::string& channel) = 0;
 
         private:
             void SensorFusionThreadProc();
             void SetRealtimePriority();
 
             std::thread m_tSensorFusionThread;
+
+            std::mutex m_updateRegistryLock;
+            std::map<std::string, std::shared_ptr<RegisterEntry>> m_updateRegistry;
 
             std::shared_ptr<algorithms::IAHRSFusionAlgorithm> m_pFusionAlgorithm;
             std::shared_ptr<sbrcontroller::sensors::ISensor> m_pGyroSensor; 

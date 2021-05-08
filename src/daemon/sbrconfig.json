@@ -51,6 +51,13 @@
             }
         ]
     },
+    "balanceControl": {
+        "Kp": 0.0,
+        "Ki": 0.0,
+        "Kd": 0.0,
+        "velocityLimit": 5.0,
+        "targetTiltAngle": 0.0
+    },
     "logging": {
         "level": "info",
         "pattern": "%+",

@@ -14,6 +14,11 @@ namespace sbrcontroller {
     static const std::string LOGGING_LOGGERS_KEY = "/logging/loggers";
     static const std::string MOTOR_CONTROL_COMS_KEY = "/motorControl/coms";
     static const std::string MOTOR_CONTROL_MOTORS_KEY = "/motorControl/motors";
+    static const std::string SELF_BALANCING_P_CONST_KEY = "/balanceControl/Kp";
+    static const std::string SELF_BALANCING_I_CONST_KEY = "/balanceControl/Ki";
+    static const std::string SELF_BALANCING_D_CONST_KEY = "/balanceControl/Kd";
+    static const std::string SELF_BALANCING_VELOCITY_LIMIT_KEY = "/balanceControl/velocityLimit";
+    static const std::string SELF_BALANCING_TARGET_TILT_KEY = "/balanceControl/targetTiltAngle";
 
     // engineering constants
 

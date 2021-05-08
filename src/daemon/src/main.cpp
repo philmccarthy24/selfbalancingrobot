@@ -35,21 +35,17 @@ int main()
             auto pFactory = make_shared<utility::SBRProdFactory>();
             utility::Register::RegisterLoggerFactory(pLoggerFactory);
             utility::Register::RegisterFactory(pFactory);
-            
+
+            auto pSBRController = pFactory->CreateSBRController();
+            pSBRController->BeginControl();
+
             logger->info("SBRController running!");
 
-            // more setup code here... TODO
-            {
-                auto pMotorController = pFactory->CreateMotorController();
-                pMotorController->SetMotorVelocity("left", 10.0);
-                pMotorController->SetMotorVelocity("right", 10.0);
-                std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-            }
-
+            // TODO: Find out what we need to do to run this as an actual daemon
             printf("Press Return to quit\n");  
             getchar();
             
-            
+            pSBRController->EndControl();
         }
         catch (const std::exception& ex) {
             logger->error(ex.what());

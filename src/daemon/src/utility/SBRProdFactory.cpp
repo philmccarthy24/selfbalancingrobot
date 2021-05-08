@@ -15,6 +15,7 @@
 #include "StringReaderWriter.h"
 #include "GCodeChecksumCalc.h"
 #include "ODriveController.h"
+#include "SBRController.h"
 #include "ILoggerFactory.h"
 
 using namespace sbrcontroller::sensors;
@@ -157,5 +158,20 @@ namespace sbrcontroller {
             return std::make_shared<ODriveController>(pStringReaderWriter, pChecksumCalculator, motorConfigSections);
         }
 
+        std::shared_ptr<motor::ISBRController> SBRProdFactory::CreateSBRController() const
+        {
+            float Kp = std::stof(Register::Config().GetConfigValue(SELF_BALANCING_P_CONST_KEY);
+            float Ki = std::stof(Register::Config().GetConfigValue(SELF_BALANCING_I_CONST_KEY);
+            float Kd = std::stof(Register::Config().GetConfigValue(SELF_BALANCING_D_CONST_KEY);
+            float velocityLimit = std::stof(Register::Config().GetConfigValue(SELF_BALANCING_VELOCITY_LIMIT_KEY);
+            float targetTiltAngle = std::stof(Register::Config().GetConfigValue(SELF_BALANCING_TARGET_TILT_KEY);
+
+            auto pLogger = Register::LoggerFactory().CreateLogger("SBRController");
+            
+            auto pMotorController = CreateMotorController();
+            auto pAHRSSource = CreateAHRSDataSource();
+            
+            return std::make_shared<SBRController>(pLogger, pAHRSSource, pMotorController, Kp, Ki, Kd, velocityLimit, targetTiltAngle);
+        }
     }
 }

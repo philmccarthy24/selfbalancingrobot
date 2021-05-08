@@ -6,6 +6,10 @@
 namespace sbrcontroller {
     namespace motor {
 
+        /**
+         * Abstracts raw control of the motors through the
+         * motor controller hardware.
+         **/
         class IMotorController
         {
         public:

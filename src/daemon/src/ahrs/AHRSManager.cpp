@@ -15,6 +15,14 @@ using namespace std;
 namespace sbrcontroller {
     namespace ahrs {
 
+        struct RegisterEntry
+        {
+            RegisterEntry() : killSignal(ATOMIC_VAR_INIT(false)) {}
+
+            std::atomic_bool killSignal;
+            std::thread publishThread;
+        }
+
         AHRSManager::AHRSManager(std::shared_ptr<algorithms::IAHRSFusionAlgorithm> fusionAlgorithm,
             const std::vector<std::shared_ptr<ISensor>>& sensors,
             int sensorSamplePeriodHz,
@@ -80,19 +88,76 @@ namespace sbrcontroller {
 
                 m_pLogger->trace("Sensor read and ahrs calcs time {}us", elapsedUS.count());
                 
+                // could use platform independent sleep here instead, eg
                 //std::this_thread::sleep_for(std::chrono::milliseconds(sleepMS - (int)elapsed.count()));
                 usleep(sleepUS - elapsedUS.count());
 
                 auto sensorLoopEnd = std::chrono::high_resolution_clock::now();
-                auto  totalElapsedUS = std::chrono::duration_cast<std::chrono::microseconds>(sensorLoopEnd - sensorLoopBegin);
+                auto totalElapsedUS = std::chrono::duration_cast<std::chrono::microseconds>(sensorLoopEnd - sensorLoopBegin);
                 m_pLogger->trace("Sensor loop total time {}us", totalElapsedUS.count());
             }
         }
 
-        Quaternion AHRSManager::ReadOrientation()
+        void AHRSManager::Register(const std::string& channel, std::weak_ptr<IAHRSDataSubscriber> pSubscriber, int updateDeltaMS)
         {
-            auto qfuture = m_pFusionAlgorithm->ReadFusedSensorDataAsync();
-            return qfuture.get(); // wait for the promise to be fulfilled
+            auto updateEntry = std::make_shared<RegisterEntry>();
+            
+            updateEntry->publishThread = std::thread([updateDeltaMS, pSubscriber, channel, updateEntry] {
+                bool bNeedUnregister = false;
+                while (!updateEntry->killSignal.load())
+                {
+                    auto updateLoopBegin = std::chrono::high_resolution_clock::now();
+
+                    // read the current orientation
+                    auto qfuture = m_pFusionAlgorithm->ReadFusedSensorDataAsync();
+
+                    // lock the subscriber
+                    if (auto pSubSP = pSubscriber.lock()) 
+                    {
+                        try 
+                        {
+                            pSubSP->OnUpdate(qfuture.get());
+                        }
+                        catch (const std::exception& e)
+                        {
+                            // we have ungracefully exited update handler due to an exception - log it
+                            m_pLogger->error(ex.what());
+                            // could additionally set bNeedUnregister = true here and break, but might as well keep trying
+                        }
+                    }
+                    else 
+                    {
+                        // subscriber is no longer present, need to unregister
+                        bNeedUnregister = true;
+                        /////////////updateEntry->killSignal.store(true);////////////  !!! Thjink carefully about this - 
+                        // order of destruction and unregistyering may matter (deadloclking etc)
+                    }
+
+                    auto updateLoopEnd = std::chrono::high_resolution_clock::now();
+                    auto elapsedMS = std::chrono::duration_cast<std::chrono::milliseconds>(updateLoopEnd - updateLoopBegin);
+                    
+                    std::this_thread::sleep_for(std::chrono::milliseconds(updateDeltaMS - (int)elapsedMS.count()));
+                }
+                if (bNeedUnregister)
+                {
+                    Unregister(channel);
+                }
+            });
+
+            
+            {// lock the registry map
+                const std::lock_guard<std::mutex> lock(m_updateRegistryLock);
+                m_updateRegistry[channel] = updateEntry;
+            }// and release
+        }
+
+        void AHRSManager::Unregister(const std::string& channel)
+        {
+            //m_updateRegistry  // look up entry, signal kill and join thread here
+            {// lock the registry map
+                const std::lock_guard<std::mutex> lock(m_updateRegistryLock);
+                m_updateRegistry.erase(channel); // remove from registry
+            }// and release
         }
 
         void AHRSManager::SetRealtimePriority()

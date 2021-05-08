@@ -39,8 +39,17 @@ namespace sbrcontroller
         public:
             IAHRSDataSource() {}
             virtual ~IAHRSDataSource() {}
-            virtual Quaternion ReadOrientation() = 0;
+            virtual void Register(const std::string& channel, std::weak_ptr<IAHRSDataSubscriber> pSubscriber, int updateDeltaMS) = 0;
+            virtual void Unregister(const std::string& channel) = 0;
         };
 
+        class IAHRSDataSubscriber
+        {
+            public:
+            IAHRSDataSubscriber() {}
+            virtual ~IAHRSDataSubscriber() {}
+
+            virtual void OnUpdate(const Quaternion& orientation) = 0;
+        }
     }
 }
