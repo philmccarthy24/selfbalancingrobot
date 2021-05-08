@@ -54,7 +54,7 @@ int main(int argc, char** argv)
     }
     if (args.empty()) {
         printf("Calibtool: usage\ncalibtool -calibrate\n\tRuns a calibration of Gyro and Magnetometer\n");
-        printf("calibtool -ahrsdump (-q)\n\tOutputs visualisation data\n");
+        printf("calibtool -ahrsdump (-q) (-s)\n\tOutputs visualisation data (optionally to serial)\n");
         exit(0);
     }
 
@@ -103,17 +103,22 @@ int main(int argc, char** argv)
             }
             else if (args[0] == "-ahrsdump") {
                 bool useQuaternions = args.size() > 1 && args[1] == "-q";
-                printf(fmt::format("Dumping ahrs data in {} format to /dev/ttyS0.\n", useQuaternions ? "Quaternion" : "Euler angle").c_str());
+                bool useSerial = args.size() > 2 && args[2] == "-s";
+                printf(fmt::format("Dumping ahrs data in {} format to {}.\n", useQuaternions ? "Quaternion" : "Euler angle", useSerial ? "/dev/ttyS0" : "console").c_str());
                 printf("Press ENTER to continue. Press ENTER to then stop\n");
                 getchar();
 
                 std::atomic_bool stopDump;
                 stopDump.store(false);
-                std::thread dumpThread([&stopDump, useQuaternions] () {
+                std::thread dumpThread([&stopDump, useQuaternions, useSerial] () {
                     auto ahrsDataSource = utility::Register::Factory().CreateAHRSDataSource();
 
-                    auto pSerialLogger = utility::Register::LoggerFactory().CreateLogger("SerialLogger");
-                    sbrcontroller::coms::LinuxSerialDevice serialDevice(pSerialLogger, "/dev/ttyS0");
+                    std::shared_ptr<sbrcontroller::coms::ISerialDevice> pSerialDev = nullptr;
+                    if (useSerial) 
+                    {
+                        auto pSerialLogger = utility::Register::LoggerFactory().CreateLogger("SerialLogger");
+                        pSerialDev = std::make_shared<sbrcontroller::coms::LinuxSerialDevice>(pSerialLogger, "/dev/ttyS0");
+                    }
 
                     while (stopDump == false)
                     {
@@ -126,7 +131,10 @@ int main(int argc, char** argv)
                             datum = fmt::format("Quaternion: {:3.2f}, {:3.2f}, {:3.2f}, {:3.2f}\n", currOriQ.w, currOriQ.x, currOriQ.y, currOriQ.z);
                         }
                         
-                        serialDevice.Write((char*)datum.c_str(), datum.size());
+                        if (useSerial)
+                            pSerialDev->Write((char*)datum.c_str(), datum.size());
+                        else
+                            printf(datum.c_str());
                         std::this_thread::sleep_for(std::chrono::milliseconds(200));
                     }                
                 });
