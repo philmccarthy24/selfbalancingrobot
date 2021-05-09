@@ -160,18 +160,18 @@ namespace sbrcontroller {
 
         std::shared_ptr<motor::ISBRController> SBRProdFactory::CreateSBRController() const
         {
-            float Kp = std::stof(Register::Config().GetConfigValue(SELF_BALANCING_P_CONST_KEY);
-            float Ki = std::stof(Register::Config().GetConfigValue(SELF_BALANCING_I_CONST_KEY);
-            float Kd = std::stof(Register::Config().GetConfigValue(SELF_BALANCING_D_CONST_KEY);
-            float velocityLimit = std::stof(Register::Config().GetConfigValue(SELF_BALANCING_VELOCITY_LIMIT_KEY);
-            float targetTiltAngle = std::stof(Register::Config().GetConfigValue(SELF_BALANCING_TARGET_TILT_KEY);
+            float Kp = std::stof(utility::Register::Config().GetConfigValue(SELF_BALANCING_P_CONST_KEY));
+            float Ki = std::stof(utility::Register::Config().GetConfigValue(SELF_BALANCING_I_CONST_KEY));
+            float Kd = std::stof(utility::Register::Config().GetConfigValue(SELF_BALANCING_D_CONST_KEY));
+            float velocityLimit = std::stof(utility::Register::Config().GetConfigValue(SELF_BALANCING_VELOCITY_LIMIT_KEY));
+            float targetTiltAngle = std::stof(utility::Register::Config().GetConfigValue(SELF_BALANCING_TARGET_TILT_KEY));
 
-            auto pLogger = Register::LoggerFactory().CreateLogger("SBRController");
+            auto pLogger = utility::Register::LoggerFactory().CreateLogger("SBRController");
             
             auto pMotorController = CreateMotorController();
             auto pAHRSSource = CreateAHRSDataSource();
             
-            return std::make_shared<SBRController>(pLogger, pAHRSSource, pMotorController, Kp, Ki, Kd, velocityLimit, targetTiltAngle);
+            return std::make_shared<motor::SBRController>(pLogger, pAHRSSource, pMotorController, Kp, Ki, Kd, velocityLimit, targetTiltAngle);
         }
     }
 }

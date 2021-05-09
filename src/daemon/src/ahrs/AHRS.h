@@ -31,7 +31,16 @@ namespace sbrcontroller
             float x;
             float y;
             float z;
-            Ori3DRads ToEuler();
+            Ori3DRads ToEuler() const;
+        };
+
+        class IAHRSDataSubscriber
+        {
+        public:
+            IAHRSDataSubscriber() {}
+            virtual ~IAHRSDataSubscriber() {}
+
+            virtual void OnUpdate(const Quaternion& orientation) = 0;
         };
 
         class IAHRSDataSource
@@ -42,14 +51,5 @@ namespace sbrcontroller
             virtual void Register(const std::string& channel, std::weak_ptr<IAHRSDataSubscriber> pSubscriber, int updateDeltaMS) = 0;
             virtual void Unregister(const std::string& channel) = 0;
         };
-
-        class IAHRSDataSubscriber
-        {
-            public:
-            IAHRSDataSubscriber() {}
-            virtual ~IAHRSDataSubscriber() {}
-
-            virtual void OnUpdate(const Quaternion& orientation) = 0;
-        }
     }
 }

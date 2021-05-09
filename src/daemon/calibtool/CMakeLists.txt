@@ -1,6 +1,8 @@
 ﻿set(calibtool_sources
 Calibration.h
 Calibration.cpp
+AHRSDump.h
+AHRSDump.cpp
 main.cpp
 )
 

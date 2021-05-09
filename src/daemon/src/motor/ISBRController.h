@@ -10,8 +10,8 @@ namespace sbrcontroller {
     class ISBRController
     {
     public:
-        ISBRController();
-        virtual ~ISBRController();
+        ISBRController() {}
+        virtual ~ISBRController() {}
 
         virtual void BeginControl() = 0;
         virtual void EndControl() = 0;

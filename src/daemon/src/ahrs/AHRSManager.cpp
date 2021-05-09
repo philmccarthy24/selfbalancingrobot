@@ -21,7 +21,7 @@ namespace sbrcontroller {
 
             std::atomic_bool killSignal;
             std::thread publishThread;
-        }
+        };
 
         AHRSManager::AHRSManager(std::shared_ptr<algorithms::IAHRSFusionAlgorithm> fusionAlgorithm,
             const std::vector<std::shared_ptr<ISensor>>& sensors,
@@ -102,7 +102,7 @@ namespace sbrcontroller {
         {
             auto updateEntry = std::make_shared<RegisterEntry>();
             
-            updateEntry->publishThread = std::thread([updateDeltaMS, pSubscriber, channel, updateEntry] {
+            updateEntry->publishThread = std::thread([this, updateDeltaMS, pSubscriber, channel, updateEntry] {
                 bool bNeedUnregister = false;
                 while (!updateEntry->killSignal.load())
                 {
@@ -118,7 +118,7 @@ namespace sbrcontroller {
                         {
                             pSubSP->OnUpdate(qfuture.get());
                         }
-                        catch (const std::exception& e)
+                        catch (const std::exception& ex)
                         {
                             // we have ungracefully exited update handler due to an exception - log it
                             m_pLogger->error(ex.what());
@@ -129,8 +129,7 @@ namespace sbrcontroller {
                     {
                         // subscriber is no longer present, need to unregister
                         bNeedUnregister = true;
-                        /////////////updateEntry->killSignal.store(true);////////////  !!! Thjink carefully about this - 
-                        // order of destruction and unregistyering may matter (deadloclking etc)
+                        break;
                     }
 
                     auto updateLoopEnd = std::chrono::high_resolution_clock::now();
@@ -153,11 +152,26 @@ namespace sbrcontroller {
 
         void AHRSManager::Unregister(const std::string& channel)
         {
-            //m_updateRegistry  // look up entry, signal kill and join thread here
+            std::shared_ptr<RegisterEntry> updateEntry = nullptr;
             {// lock the registry map
                 const std::lock_guard<std::mutex> lock(m_updateRegistryLock);
-                m_updateRegistry.erase(channel); // remove from registry
+                auto updateEntryIter = m_updateRegistry.find(channel);
+                if (updateEntryIter != m_updateRegistry.end()) {
+                    updateEntry = updateEntryIter->second;
+                }
             }// and release
+
+            if (updateEntry != nullptr) 
+            {
+                // signal the publish thread to end
+                updateEntry->killSignal.store(true);
+                // wait for it to terminate
+                updateEntry->publishThread.join();
+                {// lock the registry map
+                    const std::lock_guard<std::mutex> lock(m_updateRegistryLock);
+                    m_updateRegistry.erase(channel); // remove from registry
+                }// and release
+            } // otherwise, has already been unregistered
         }
 
         void AHRSManager::SetRealtimePriority()

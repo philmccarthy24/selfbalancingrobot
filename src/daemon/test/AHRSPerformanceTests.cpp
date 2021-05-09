@@ -156,7 +156,7 @@ void AHRSPerformanceTests::RestingSensorVarianceTest(const std::string& config)
         
         std::vector<ahrs::Ori3DRads> collectedData;
         for (int i = 0; i < sampleSize; i++) {
-            auto currOrientation = ahrsDataSource->ReadOrientation().ToEuler();
+            //auto currOrientation = ahrsDataSource->ReadOrientation().ToEuler();
             collectedData.push_back(currOrientation);
             logger->trace("Roll {:03.5f} degrees, Pitch {:03.5f} degrees, Yaw {:03.5f} degrees", currOrientation.GetRollInDegrees(), currOrientation.GetPitchInDegrees(), currOrientation.GetYawInDegrees());
             std::this_thread::sleep_for(std::chrono::milliseconds(sleepMS));

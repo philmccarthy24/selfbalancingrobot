@@ -6,6 +6,7 @@
 #include "LoggerFactory.h"
 #include "Calibration.h"
 #include "AHRS.h"
+#include "AHRSDump.h"
 #include "LinuxSerialDevice.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/stopwatch.h"
@@ -108,39 +109,20 @@ int main(int argc, char** argv)
                 printf("Press ENTER to continue. Press ENTER to then stop\n");
                 getchar();
 
-                std::atomic_bool stopDump;
-                stopDump.store(false);
-                std::thread dumpThread([&stopDump, useQuaternions, useSerial] () {
-                    auto ahrsDataSource = utility::Register::Factory().CreateAHRSDataSource();
-
-                    std::shared_ptr<sbrcontroller::coms::ISerialDevice> pSerialDev = nullptr;
-                    if (useSerial) 
-                    {
-                        auto pSerialLogger = utility::Register::LoggerFactory().CreateLogger("SerialLogger");
-                        pSerialDev = std::make_shared<sbrcontroller::coms::LinuxSerialDevice>(pSerialLogger, "/dev/ttyS0");
-                    }
-
-                    while (stopDump == false)
-                    {
-                        auto currOriQ = ahrsDataSource->ReadOrientation();
-                        std::string datum;
-                        if (!useQuaternions) {
-                            auto currOrientation = currOriQ.ToEuler();
-                            datum = fmt::format("Orientation: {:3.2f}, {:3.2f}, {:3.2f}\n", currOrientation.GetRollInDegrees(), currOrientation.GetPitchInDegrees(), currOrientation.GetYawInDegrees());
-                        } else {
-                            datum = fmt::format("Quaternion: {:3.2f}, {:3.2f}, {:3.2f}, {:3.2f}\n", currOriQ.w, currOriQ.x, currOriQ.y, currOriQ.z);
-                        }
-                        
-                        if (useSerial)
-                            pSerialDev->Write((char*)datum.c_str(), datum.size());
-                        else
-                            printf(datum.c_str());
-                        std::this_thread::sleep_for(std::chrono::milliseconds(200));
-                    }                
-                });
+                auto ahrsDataSource = utility::Register::Factory().CreateAHRSDataSource();
+                std::shared_ptr<sbrcontroller::coms::ISerialDevice> pSerialDev = nullptr;
+                if (useSerial) 
+                {
+                    auto pSerialLogger = utility::Register::LoggerFactory().CreateLogger("SerialLogger");
+                    pSerialDev = std::make_shared<sbrcontroller::coms::LinuxSerialDevice>(pSerialLogger, "/dev/ttyS0");
+                }
+                auto ahrsDump = std::make_shared<calibtool::AHRSDump>(pSerialDev, useQuaternions);
+                ahrsDataSource->Register("AHRSDump", ahrsDump, 200);
+                
+                // the ahrs publish thread is now running and calling the ahrsDump handler
                 getchar();
-                stopDump.store(true);
-                dumpThread.join();
+
+                ahrsDataSource->Unregister("AHRSDump");
             }
                 
         }

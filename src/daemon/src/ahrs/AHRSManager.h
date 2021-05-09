@@ -2,6 +2,7 @@
 #include "AHRS.h"
 #include "IAHRSFusionAlgorithm.h"
 #include <memory>
+#include <map>
 #include <vector>
 #include <thread>
 #include <mutex>
@@ -34,8 +35,8 @@ namespace sbrcontroller
                 std::shared_ptr<spdlog::logger> pLogger);
             virtual ~AHRSManager();
 
-            virtual void Register(const std::string& channel, std::weak_ptr<IAHRSDataSubscriber> pSubscriber, int updateDeltaMS) = 0;
-            virtual void Unregister(const std::string& channel) = 0;
+            virtual void Register(const std::string& channel, std::weak_ptr<IAHRSDataSubscriber> pSubscriber, int updateDeltaMS) override;
+            virtual void Unregister(const std::string& channel) override;
 
         private:
             void SensorFusionThreadProc();
