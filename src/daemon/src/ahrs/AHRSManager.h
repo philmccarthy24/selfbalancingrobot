@@ -40,7 +40,7 @@ namespace sbrcontroller
 
         private:
             void SensorFusionThreadProc();
-            void SetRealtimePriority();
+            void PublishThreadProc(std::shared_ptr<RegisterEntry> updateEntry, const std::string& channel, std::weak_ptr<IAHRSDataSubscriber> pSubscriber, int updateDeltaMS);
 
             std::thread m_tSensorFusionThread;
 

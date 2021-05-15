@@ -34,7 +34,6 @@ set(sbrtest_sources
 MemoryConfigProvider.h
 AHRSPerformanceTests.cpp
 StringReaderWriterTests.cpp
-GCodeChecksumCalcTests.cpp
 MotorComsIntegrationTests.cpp
 )
 

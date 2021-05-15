@@ -3,6 +3,7 @@
 #include "AHRS.h"
 #include <memory>
 #include <vector>
+#include <chrono>
 
 namespace sbrcontroller {
     namespace coms {
@@ -24,6 +25,7 @@ namespace calibtool {
         bool m_bUseSerial;
         bool m_bUseQuaternions;
         std::shared_ptr<sbrcontroller::coms::ISerialDevice> m_pSerialDevice;
+        std::chrono::time_point<std::chrono::high_resolution_clock> m_lastLoopTime;
     };
 
 }

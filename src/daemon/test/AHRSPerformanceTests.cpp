@@ -12,12 +12,53 @@
 #include <algorithm>
 #include <numeric>
 #include <chrono>
+#include <future>
+#include <vector>
 
 using namespace std;
 using namespace sbrcontroller;
 
 namespace sbrcontroller {
     namespace test {
+
+    class AHRSCollector : public sbrcontroller::ahrs::IAHRSDataSubscriber
+    {
+    public:
+        AHRSCollector(int sampleSize) : 
+            m_sampleSize(sampleSize),
+            m_bCompleted(false) 
+        {
+        }
+
+        virtual ~AHRSCollector() {}
+
+        virtual void OnUpdate(const sbrcontroller::ahrs::Quaternion& orientation) override 
+        {
+            //logger->trace("Roll {:03.5f} degrees, Pitch {:03.5f} degrees, Yaw {:03.5f} degrees", currOrientation.GetRollInDegrees(), currOrientation.GetPitchInDegrees(), currOrientation.GetYawInDegrees());
+            if (!m_bCompleted) {
+                if (m_collectedAHRSData.size() < m_sampleSize)
+                {
+                    m_collectedAHRSData.push_back(orientation);
+                }
+                else 
+                {
+                    m_completedSamples.set_value(m_collectedAHRSData);
+                    m_bCompleted = true;
+                }
+            }
+        }
+
+        std::future<std::vector<sbrcontroller::ahrs::Quaternion>> GetSamples()
+        {
+            return m_completedSamples.get_future();
+        }
+
+    private:
+        std::vector<sbrcontroller::ahrs::Quaternion> m_collectedAHRSData;
+        std::promise<std::vector<sbrcontroller::ahrs::Quaternion>> m_completedSamples;
+        int m_sampleSize;
+        bool m_bCompleted;
+    };
 
 class AHRSPerformanceTests : public ::testing::Test
 {
@@ -147,20 +188,20 @@ void AHRSPerformanceTests::RestingSensorVarianceTest(const std::string& config)
         auto pFactory = make_shared<utility::SBRProdFactory>();
         utility::Register::RegisterFactory(pFactory);
 
-        auto ahrsDataSource = utility::Register::Factory().CreateAHRSDataSource();
-
         const int sampleSize = 100;
         const int sleepMS = 300;
+
+        auto dataCollector = std::make_shared<AHRSCollector>(sampleSize);
+        auto ahrsDataSource = utility::Register::Factory().CreateAHRSDataSource();
         spdlog::stopwatch sw;
+        ahrsDataSource->Register("AHRSCollector", dataCollector, sleepMS);
+
         logger->info("Collecting performance data for {} ahrs samples", sampleSize);
         
-        std::vector<ahrs::Ori3DRads> collectedData;
-        for (int i = 0; i < sampleSize; i++) {
-            //auto currOrientation = ahrsDataSource->ReadOrientation().ToEuler();
-            collectedData.push_back(currOrientation);
-            logger->trace("Roll {:03.5f} degrees, Pitch {:03.5f} degrees, Yaw {:03.5f} degrees", currOrientation.GetRollInDegrees(), currOrientation.GetPitchInDegrees(), currOrientation.GetYawInDegrees());
-            std::this_thread::sleep_for(std::chrono::milliseconds(sleepMS));
-        }
+        auto dataFuture = dataCollector->GetSamples();
+        auto collectedData = dataFuture.get(); // blocks until samples collected
+        
+        ahrsDataSource->Unregister("AHRSCollector");
 
         logger->info("Stationary ahrs analysis for {} samples - collection took {:.3}s (should be {}s):", collectedData.size(), sw, (static_cast<float>(sleepMS)/1000.0) * sampleSize);
         double rollMean = 0.0, rollStdDev = 0.0, rollMaxErr = 0.0, rollMinErr = 0.0;
@@ -168,28 +209,33 @@ void AHRSPerformanceTests::RestingSensorVarianceTest(const std::string& config)
         double yawMean = 0.0, yawStdDev = 0.0, yawMaxErr = 0.0, yawMinErr = 0.0;
         
         for (auto& item : collectedData) {
-            rollMean += item.GetRollInDegrees();
-            pitchMean += item.GetPitchInDegrees();
-            yawMean += item.GetYawInDegrees();
+            auto ori = item.ToEuler();
+            rollMean += ori.GetRollInDegrees();
+            pitchMean += ori.GetPitchInDegrees();
+            yawMean += ori.GetYawInDegrees();
         }
         rollMean /= collectedData.size();
         pitchMean /= collectedData.size();
         yawMean /= collectedData.size();
 
-        rollStdDev = sqrt(std::accumulate(collectedData.begin(), collectedData.end(), 0.0, [&] (double sqErrSum, const ahrs::Ori3DRads& nextItem) {
-            return sqErrSum + pow(nextItem.GetRollInDegrees() - rollMean, 2);
+        rollStdDev = sqrt(std::accumulate(collectedData.begin(), collectedData.end(), 0.0, [&] (double sqErrSum, const sbrcontroller::ahrs::Quaternion& nextItem) {
+            auto ori = nextItem.ToEuler();
+            return sqErrSum + pow(ori.GetRollInDegrees() - rollMean, 2);
         }) / collectedData.size());
-        pitchStdDev = sqrt(std::accumulate(collectedData.begin(), collectedData.end(), 0.0, [&] (double sqErrSum, const ahrs::Ori3DRads& nextItem) {
-            return sqErrSum + pow(nextItem.GetPitchInDegrees() - pitchMean, 2);
+        pitchStdDev = sqrt(std::accumulate(collectedData.begin(), collectedData.end(), 0.0, [&] (double sqErrSum, const sbrcontroller::ahrs::Quaternion& nextItem) {
+            auto ori = nextItem.ToEuler();
+            return sqErrSum + pow(ori.GetPitchInDegrees() - pitchMean, 2);
         }) / collectedData.size());
-        yawStdDev = sqrt(std::accumulate(collectedData.begin(), collectedData.end(), 0.0, [&] (double sqErrSum, const ahrs::Ori3DRads& nextItem) {
-            return sqErrSum + pow(nextItem.GetYawInDegrees() - yawMean, 2);
+        yawStdDev = sqrt(std::accumulate(collectedData.begin(), collectedData.end(), 0.0, [&] (double sqErrSum, const sbrcontroller::ahrs::Quaternion& nextItem) {
+            auto ori = nextItem.ToEuler();
+            return sqErrSum + pow(ori.GetYawInDegrees() - yawMean, 2);
         }) / collectedData.size());
 
         for (auto& item : collectedData) {
-            double rollErr = item.GetRollInDegrees() - rollMean;
-            double pitchErr = item.GetPitchInDegrees() - pitchMean;
-            double yawErr = item.GetYawInDegrees() - yawMean;
+            auto ori = item.ToEuler();
+            double rollErr = ori.GetRollInDegrees() - rollMean;
+            double pitchErr = ori.GetPitchInDegrees() - pitchMean;
+            double yawErr = ori.GetYawInDegrees() - yawMean;
             if (rollMaxErr < rollErr) {
                 rollMaxErr = rollErr;
             }

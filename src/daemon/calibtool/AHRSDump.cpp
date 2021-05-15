@@ -8,6 +8,7 @@ namespace calibtool {
     m_pSerialDevice(pSerialDevice),
     m_bUseQuaternions(useQuaternions)
     {
+        m_lastLoopTime = std::chrono::high_resolution_clock::now();
     }
 
     AHRSDump::~AHRSDump()
@@ -16,6 +17,13 @@ namespace calibtool {
 
     void AHRSDump::OnUpdate(const sbrcontroller::ahrs::Quaternion& orientation)
     {
+        // timing code to proove update handler is being called in a timely fashion
+        auto updateTime = std::chrono::high_resolution_clock::now();
+        auto totalElapsedUS = std::chrono::duration_cast<std::chrono::microseconds>(updateTime - m_lastLoopTime);
+        int count = totalElapsedUS.count();
+        //printf("Update loop total time %d us\n", count);
+        m_lastLoopTime = updateTime;
+
         std::string datum;
         if (!m_bUseQuaternions) {
             auto currOrientation = orientation.ToEuler();

@@ -1,6 +1,5 @@
 #include "ODriveController.h"
 #include "IStringReaderWriter.h"
-#include "IChecksumCalculator.h"
 #include "IConfigSection.h"
 #include "SBRCommon.h"
 #include <fmt/core.h>
@@ -23,10 +22,8 @@ namespace sbrcontroller {
         {
         public:
             ODriveControllerImpl(std::shared_ptr<IStringReaderWriter> pStringReaderWriter,
-                std::shared_ptr<IChecksumCalculator> pChecksumCalculator,
                 const std::vector<std::shared_ptr<IConfigSection>>& motorConfigs) :
-            m_pStringReaderWriter(pStringReaderWriter),
-            m_pChecksumCalculator(pChecksumCalculator)
+            m_pStringReaderWriter(pStringReaderWriter)
             {
                 for (auto& motorConfig : motorConfigs) 
                 {
@@ -86,12 +83,16 @@ namespace sbrcontroller {
 
             std::string AppendGCodeChecksum(const std::string& cmd)
             {
-                return std::string(cmd + m_pChecksumCalculator->Calculate(cmd) + "\n");
+                char cs8bit = 0;
+                for (const char& c : cmd)
+                {
+                    cs8bit ^= c;
+                }
+                return fmt::format("{}*{:d}\n", cmd, cs8bit);
             }
 
         private:
             std::shared_ptr<IStringReaderWriter> m_pStringReaderWriter;
-            std::shared_ptr<IChecksumCalculator> m_pChecksumCalculator;
             std::map<std::string, std::shared_ptr<MotorConfig>> m_motorSettings;
         };
 
@@ -99,9 +100,9 @@ namespace sbrcontroller {
         ////////////////////////////////////////////////////////////////////////
         ////////// PIMPL Forwarders
         
-        ODriveController::ODriveController(std::shared_ptr<IStringReaderWriter> pStringReaderWriter, std::shared_ptr<IChecksumCalculator> pChecksumCalculator, const std::vector<std::shared_ptr<IConfigSection>>& motorConfigs)
+        ODriveController::ODriveController(std::shared_ptr<IStringReaderWriter> pStringReaderWriter, const std::vector<std::shared_ptr<IConfigSection>>& motorConfigs)
         {
-            m_pImpl = std::make_shared<ODriveControllerImpl>(pStringReaderWriter, pChecksumCalculator, motorConfigs);
+            m_pImpl = std::make_shared<ODriveControllerImpl>(pStringReaderWriter, motorConfigs);
         }
 
         ODriveController::~ODriveController()

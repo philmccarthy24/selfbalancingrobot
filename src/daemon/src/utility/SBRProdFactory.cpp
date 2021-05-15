@@ -13,7 +13,6 @@
 #include "LinuxI2CDevice.h"
 #include "LinuxSerialDevice.h"
 #include "StringReaderWriter.h"
-#include "GCodeChecksumCalc.h"
 #include "ODriveController.h"
 #include "SBRController.h"
 #include "ILoggerFactory.h"
@@ -131,11 +130,6 @@ namespace sbrcontroller {
             return calibData;
         }
 
-        std::shared_ptr<IChecksumCalculator> SBRProdFactory::CreateChecksumCalculator() const
-        {
-            return std::make_shared<GCodeChecksumCalc>();
-        }
-
         std::shared_ptr<IStringReaderWriter> SBRProdFactory::CreateStringReaderWriter(std::shared_ptr<coms::ISerialDevice> pSerialDevice) const
         {
             return std::make_shared<coms::StringReaderWriter>(pSerialDevice);
@@ -152,10 +146,9 @@ namespace sbrcontroller {
             
             auto pRawSerial = CreateSerialDevice(serialPort, baudRate);
             auto pStringReaderWriter = CreateStringReaderWriter(pRawSerial);
-            auto pChecksumCalculator = CreateChecksumCalculator();
         
             auto motorConfigSections = utility::Register::Config().GetConfigSections(MOTOR_CONTROL_MOTORS_KEY);
-            return std::make_shared<ODriveController>(pStringReaderWriter, pChecksumCalculator, motorConfigSections);
+            return std::make_shared<ODriveController>(pStringReaderWriter, motorConfigSections);
         }
 
         std::shared_ptr<motor::ISBRController> SBRProdFactory::CreateSBRController() const

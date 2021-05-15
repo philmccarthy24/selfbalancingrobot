@@ -3,11 +3,11 @@
 #include "IAHRSFusionAlgorithm.h"
 #include "SBRCommon.h"
 #include "sensors.h"
+#include "ThreadHelper.h"
 #include "spdlog/spdlog.h"
 #include <chrono>
 #include <unistd.h>
 #include <pthread.h>
-#include <sched.h>
 
 using namespace sbrcontroller::sensors;
 using namespace std;
@@ -51,13 +51,29 @@ namespace sbrcontroller {
 
         AHRSManager::~AHRSManager()
         {
+            // unregister all the subscribers and clean up their threads
+            std::vector<std::string> channels;
+            {// lock the registry map
+                const std::lock_guard<std::mutex> lock(m_updateRegistryLock);
+
+                for (auto updateEntryIter : m_updateRegistry)
+                {
+                    channels.push_back(updateEntryIter.first);
+                }
+            }
+            for (const auto& channel : channels)
+            {
+                Unregister(channel);
+            }
+
+            // now we can kill sensor fusion thread
             m_bKillSignal.store(true);
             m_tSensorFusionThread.join();
         }
 
         void AHRSManager::SensorFusionThreadProc()
         {
-            SetRealtimePriority();
+            utility::ThreadHelper::SetRealtimePriority(m_pLogger);
 
             TripleAxisData gyroDataRadsPerSec = {}, accelDataGsPerSec = {}, magDataGauss = {};
 
@@ -103,46 +119,8 @@ namespace sbrcontroller {
             auto updateEntry = std::make_shared<RegisterEntry>();
             
             updateEntry->publishThread = std::thread([this, updateDeltaMS, pSubscriber, channel, updateEntry] {
-                bool bNeedUnregister = false;
-                while (!updateEntry->killSignal.load())
-                {
-                    auto updateLoopBegin = std::chrono::high_resolution_clock::now();
-
-                    // read the current orientation
-                    auto qfuture = m_pFusionAlgorithm->ReadFusedSensorDataAsync();
-
-                    // lock the subscriber
-                    if (auto pSubSP = pSubscriber.lock()) 
-                    {
-                        try 
-                        {
-                            pSubSP->OnUpdate(qfuture.get());
-                        }
-                        catch (const std::exception& ex)
-                        {
-                            // we have ungracefully exited update handler due to an exception - log it
-                            m_pLogger->error(ex.what());
-                            // could additionally set bNeedUnregister = true here and break, but might as well keep trying
-                        }
-                    }
-                    else 
-                    {
-                        // subscriber is no longer present, need to unregister
-                        bNeedUnregister = true;
-                        break;
-                    }
-
-                    auto updateLoopEnd = std::chrono::high_resolution_clock::now();
-                    auto elapsedMS = std::chrono::duration_cast<std::chrono::milliseconds>(updateLoopEnd - updateLoopBegin);
-                    
-                    std::this_thread::sleep_for(std::chrono::milliseconds(updateDeltaMS - (int)elapsedMS.count()));
-                }
-                if (bNeedUnregister)
-                {
-                    Unregister(channel);
-                }
+                PublishThreadProc(updateEntry, channel, pSubscriber, updateDeltaMS);
             });
-
             
             {// lock the registry map
                 const std::lock_guard<std::mutex> lock(m_updateRegistryLock);
@@ -152,67 +130,70 @@ namespace sbrcontroller {
 
         void AHRSManager::Unregister(const std::string& channel)
         {
-            std::shared_ptr<RegisterEntry> updateEntry = nullptr;
             {// lock the registry map
                 const std::lock_guard<std::mutex> lock(m_updateRegistryLock);
+
+                std::shared_ptr<RegisterEntry> updateEntry = nullptr;
+            
                 auto updateEntryIter = m_updateRegistry.find(channel);
                 if (updateEntryIter != m_updateRegistry.end()) {
                     updateEntry = updateEntryIter->second;
                 }
-            }// and release
 
-            if (updateEntry != nullptr) 
-            {
-                // signal the publish thread to end
-                updateEntry->killSignal.store(true);
-                // wait for it to terminate
-                updateEntry->publishThread.join();
-                {// lock the registry map
-                    const std::lock_guard<std::mutex> lock(m_updateRegistryLock);
+                if (updateEntry != nullptr)
+                {
+                    // signal the publish thread to end
+                    updateEntry->killSignal.store(true);
+                    // wait for it to terminate
+                    updateEntry->publishThread.join();
+
                     m_updateRegistry.erase(channel); // remove from registry
-                }// and release
-            } // otherwise, has already been unregistered
+                } // otherwise, has already been unregistered
+
+            }// and release
         }
 
-        void AHRSManager::SetRealtimePriority()
+        void AHRSManager::PublishThreadProc(std::shared_ptr<RegisterEntry> updateEntry, const std::string& channel, std::weak_ptr<IAHRSDataSubscriber> pSubscriber, int updateDeltaMS)
         {
-            int ret;
-        
-            // We'll operate on the currently running thread.
-            pthread_t this_thread = pthread_self();
-            // struct sched_param is used to store the scheduling priority
-            struct sched_param params;
-        
-            // We'll set the priority to the maximum.
-            params.sched_priority = sched_get_priority_max(SCHED_FIFO);
+            bool bNeedUnregister = false;
+            while (!updateEntry->killSignal.load())
+            {
+                auto updateLoopBegin = std::chrono::high_resolution_clock::now();
 
-            m_pLogger->debug("Trying to set thread realtime prio = {}", params.sched_priority);
-        
-            // Attempt to set thread real-time priority to the SCHED_FIFO policy
-            ret = pthread_setschedparam(this_thread, SCHED_FIFO, &params);
-            if (ret != 0) {
-                // Print the error
-                m_pLogger->error("Unsuccessful in setting thread realtime prio");
-                return;     
-            }
+                // read the current orientation
+                auto qfuture = m_pFusionAlgorithm->ReadFusedSensorDataAsync();
 
-            // Now verify the change in thread priority
-            int policy = 0;
-            ret = pthread_getschedparam(this_thread, &policy, &params);
-            if (ret != 0) {
-                m_pLogger->error("Couldn't retrieve real-time scheduling paramers");
-                return;
+                // lock the subscriber
+                if (auto pSubSP = pSubscriber.lock()) 
+                {
+                    try 
+                    {        
+                        pSubSP->OnUpdate(qfuture.get());
+                    }
+                    catch (const std::exception& ex)
+                    {
+                        // we have ungracefully exited update handler due to an exception - log it
+                        m_pLogger->error(ex.what());
+                        // could additionally set bNeedUnregister = true here and break, but might as well keep trying
+                    }
+                }
+                else 
+                {
+                    // subscriber is no longer present, need to unregister
+                    bNeedUnregister = true;
+                    break;
+                }
+
+                auto updateLoopEnd = std::chrono::high_resolution_clock::now();
+                auto elapsedMS = std::chrono::duration_cast<std::chrono::milliseconds>(updateLoopEnd - updateLoopBegin);
+                
+                std::this_thread::sleep_for(std::chrono::milliseconds(updateDeltaMS - (int)elapsedMS.count()));
             }
-        
-            // Check the correct policy was applied
-            if(policy != SCHED_FIFO) {
-                m_pLogger->error("Scheduling is NOT SCHED_FIFO!");
-            } else {
-                m_pLogger->debug("SCHED_FIFO OK");
+            if (bNeedUnregister)
+            {
+                Unregister(channel);
             }
-        
-            // Print thread scheduling priority
-            m_pLogger->debug("Thread priority is {}", params.sched_priority);
         }
+        
     }
 }

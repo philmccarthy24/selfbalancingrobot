@@ -57,9 +57,8 @@ set(utility_files
   ILoggerFactory.h
   LoggerFactory.h
   LoggerFactory.cpp
-  IChecksumCalculator.h
-  GCodeChecksumCalc.h
-  GCodeChecksumCalc.cpp
+  ThreadHelper.h
+  ThreadHelper.cpp
 )
 
 add_library(utility ${utility_files})

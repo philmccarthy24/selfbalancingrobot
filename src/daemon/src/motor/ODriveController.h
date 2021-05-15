@@ -22,7 +22,6 @@ namespace sbrcontroller {
         {
         public:
             ODriveController(std::shared_ptr<sbrcontroller::coms::IStringReaderWriter> pStringReaderWriter, 
-                std::shared_ptr<sbrcontroller::utility::IChecksumCalculator> pChecksumCalculator,
                 const std::vector<std::shared_ptr<sbrcontroller::utility::IConfigSection>>& motorConfigs);
             virtual ~ODriveController();
 

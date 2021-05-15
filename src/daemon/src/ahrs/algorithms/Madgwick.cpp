@@ -26,8 +26,7 @@ namespace sbrcontroller {
 			Madgwick::Madgwick(float sampleFreq, float betaConst) :
 				beta(betaConst),
 				m_fSampleFreqHz(sampleFreq),
-				m_q{1.0f, 0.0f, 0.0f, 0.0f},
-				m_qOut{}
+				m_q{1.0f, 0.0f, 0.0f, 0.0f}
 			{
 				m_bSignalRequestReading.store(false);
 			}
@@ -142,11 +141,16 @@ namespace sbrcontroller {
 				m_q.z *= recipNorm;
 
 				if (m_bSignalRequestReading) {
-					m_qOut.w = m_q.w;
-					m_qOut.x = m_q.x;
-					m_qOut.y = m_q.y;
-					m_qOut.z = m_q.z;
-					m_readingPromise.set_value(m_qOut);
+					const std::lock_guard<std::mutex> lock(m_sensorFusionLock);
+					Quaternion out { m_q.w, m_q.x, m_q.y, m_q.z };
+					while (!m_readingPromises.empty())
+  					{
+						auto& readPromise = m_readingPromises.front();
+						readPromise.set_value(out);
+						m_readingPromises.pop();
+						// note it is safe for promise to go out of scope here -
+						// state is shared and active while associated future is live
+					}
 					m_bSignalRequestReading = false;
 				}
 			}
@@ -225,32 +229,34 @@ namespace sbrcontroller {
 				m_q.z *= recipNorm;
 
 				if (m_bSignalRequestReading) {
-					m_qOut.w = m_q.w;
-					m_qOut.x = m_q.x;
-					m_qOut.y = m_q.y;
-					m_qOut.z = m_q.z;
-					m_readingPromise.set_value(m_qOut);
+					const std::lock_guard<std::mutex> lock(m_sensorFusionLock);
+					Quaternion out { m_q.w, m_q.x, m_q.y, m_q.z };
+					while (!m_readingPromises.empty())
+  					{
+						auto& readPromise = m_readingPromises.front();
+						readPromise.set_value(out);
+						m_readingPromises.pop();
+						// note it is safe for promise to go out of scope here -
+						// state is shared and active while associated future is live
+					}
 					m_bSignalRequestReading = false;
 				}
 			}
 
 			std::future<Quaternion> Madgwick::ReadFusedSensorDataAsync()
 			{
-				bool req = m_bSignalRequestReading.load();
-				if (req) {
-					throw std::runtime_error("signal reading already requested");
-				}
+				// possibly called from multiple threads. protect the shared promise queue
+				const std::lock_guard<std::mutex> lock(m_sensorFusionLock);
 
-				m_readingPromise = std::promise<Quaternion>();
-				m_bSignalRequestReading.store(true);
-				return m_readingPromise.get_future();
+				m_readingPromises.push(std::promise<Quaternion>());
+				m_bSignalRequestReading.store(true); // signal read request
+				return m_readingPromises.back().get_future();
 			}
 
 			//---------------------------------------------------------------------------------------------------
 			// Fast inverse square-root
 			// See: http://en.wikipedia.org/wiki/Fast_inverse_square_root
-
-/*
+			/*
 			float Madgwick::invSqrt(float x) {
 				float halfx = 0.5f * x;
 				float y = x;
@@ -261,7 +267,7 @@ namespace sbrcontroller {
 				y = y * (1.5f - (halfx * y * y));
 				return y;
 			}
-			*/
+			Replaced with this more efficient implementation: */
 
 			float Madgwick::invSqrt(float x) {
 				uint32_t i = 0x5F1F1412 - (*(uint32_t*)&x >> 1);

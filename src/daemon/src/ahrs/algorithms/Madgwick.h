@@ -19,6 +19,8 @@
 #include "IAHRSFusionAlgorithm.h"
 #include "AHRS.h"
 #include <atomic>
+#include <mutex>
+#include <queue>
 
 namespace sbrcontroller {
     namespace ahrs {
@@ -42,9 +44,10 @@ namespace sbrcontroller {
                 volatile float beta;	// algorithm gain, default   0.1f	(2 * proportional gain);
                 float m_fSampleFreqHz;
                 volatile Quaternion m_q;	// quaternion of sensor frame relative to auxiliary frame
-                Quaternion m_qOut;
-                std::promise<Quaternion> m_readingPromise;
+                
+                std::queue<std::promise<Quaternion>> m_readingPromises;
                 std::atomic_bool m_bSignalRequestReading;
+                std::mutex m_sensorFusionLock;
             };
         }
     }

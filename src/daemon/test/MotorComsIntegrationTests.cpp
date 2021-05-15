@@ -7,7 +7,6 @@
 #include "SBRCommon.h"
 #include "LinuxSerialDevice.h"
 #include "StringReaderWriter.h"
-#include "IChecksumCalculator.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/stopwatch.h"
 #include <gtest/gtest.h>
@@ -109,30 +108,25 @@ TEST_F(MotorComsIntegrationTests, SimpleMotorDrivingTest)
         
         auto pRawSerial = make_shared<coms::LinuxSerialDevice>(pLoggerFactory->CreateLogger("LinuxSerialDevice"), serialPort, baudRate);
         auto pSerialReaderWriter = make_shared<coms::StringReaderWriter>(pRawSerial);
-        auto pChecksumCalc = pFactory->CreateChecksumCalculator();
         std::string m0_cmd_SetClosedLoop = "w axis0.requested_state 8"; // AXIS_STATE_CLOSED_LOOP_CONTROL
-        auto m0_cmd_SetClosedLoop_cs = pChecksumCalc->Calculate(m0_cmd_SetClosedLoop);
         std::string m0_cmd_SetIdleState = "w axis0.requested_state 1"; // AXIS_STATE_IDLE
-        auto m0_cmd_SetIdleState_cs = pChecksumCalc->Calculate(m0_cmd_SetIdleState);
         std::string m0_cmd_SetVel1rpm = "v 0 1 0";
-        auto m0_cmd_SetVel1rpm_cs = pChecksumCalc->Calculate(m0_cmd_SetVel1rpm);
         std::string m0_cmd_SetVel0rpm = "v 0 0 0";
-        auto m0_cmd_SetVel0rpm_cs = pChecksumCalc->Calculate(m0_cmd_SetVel0rpm);
 
-        logger->info("Sending: {}{}\n", m0_cmd_SetClosedLoop, m0_cmd_SetClosedLoop_cs);
-        pSerialReaderWriter->Write(m0_cmd_SetClosedLoop + m0_cmd_SetClosedLoop_cs + "\n");
+        logger->info("Sending: {}\n", m0_cmd_SetClosedLoop);
+        pSerialReaderWriter->Write(m0_cmd_SetClosedLoop + "\n");
         
-        logger->info("Sending: {}{}\n", m0_cmd_SetVel1rpm, m0_cmd_SetVel1rpm_cs);
-        pSerialReaderWriter->Write(m0_cmd_SetVel1rpm + m0_cmd_SetVel1rpm_cs + "\n");
+        logger->info("Sending: {}\n", m0_cmd_SetVel1rpm);
+        pSerialReaderWriter->Write(m0_cmd_SetVel1rpm + "\n");
 
         // pause
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         // end pause
-        logger->info("Sending: {}{}\n", m0_cmd_SetVel0rpm, m0_cmd_SetVel0rpm_cs);
-        pSerialReaderWriter->Write(m0_cmd_SetVel0rpm + m0_cmd_SetVel0rpm_cs + "\n");
+        logger->info("Sending: {}\n", m0_cmd_SetVel0rpm);
+        pSerialReaderWriter->Write(m0_cmd_SetVel0rpm + "\n");
         
-        logger->info("Sending: {}{}\n", m0_cmd_SetIdleState, m0_cmd_SetIdleState_cs);
-        pSerialReaderWriter->Write(m0_cmd_SetIdleState + m0_cmd_SetIdleState_cs + "\n");
+        logger->info("Sending: {}\n", m0_cmd_SetIdleState);
+        pSerialReaderWriter->Write(m0_cmd_SetIdleState + "\n");
 
     }
     catch (const std::exception& ex) {
