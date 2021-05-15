@@ -4,6 +4,8 @@
 
 A project to explore how self balancing vehicles like the Segway / hoverboards work. This will be a long running spare-time project.
 
+![first test](https://raw.githubusercontent.com/philmccarthy24/selfbalancingrobot/master/media/first_pid_test.jpg)
+
 ## Hardware spec
 
 The robot has been built using:
@@ -13,7 +15,7 @@ The robot has been built using:
 - 28 25mm steel braces and 16 M4 bolts/washers/nuts to secure the poles to the boards.
 - 2 6.5 inch 36v rated wheel hub motors taken from a broken hoverhoard bought off ebay for £20, each secured with 4 M8 bolts, washers and wing nuts.
 
-See the mechanical drawings in the docs/mechanical directory for further details (created with [OpenSCAD](https://openscad.org/)). Here's a photo of the assembly during motor/ahrs testing:
+See the mechanical drawings in the docs/mechanical directory for further details (created with [OpenSCAD](https://openscad.org/)). Here's a photo of the assembly during motor/ahrs testing, showing how the frame is bolted together:
 
 ![motor tests](https://raw.githubusercontent.com/philmccarthy24/selfbalancingrobot/master/media/motor_tests.jpeg)
 
@@ -33,7 +35,7 @@ The wheel hub motors are driven by the ODrive at 36v.
 
 ## Software
 
-The development system runs Raspian Buster, although I'd like to use something like BuildRoot for the final system (with a mostly read-only FS to prevent SD card wear).
+The development system runs Raspian Buster. Eventually I'd like to use a mostly read-only FS to prevent SD card wear and protect against corruption when the power is shut off suddenly.
 
 The main functional components are:
 
@@ -42,28 +44,40 @@ The main functional components are:
 
 gRPC is used to send data between the web application and the backend control daemon.
 
-## Progress
+Will provide some UML diagrams of detailed design if I get time.
 
-- Mechanical frame built. Odrive and wheels installed, wiring complete.
-- Temporary wiring to Pi4 and AHRS breakout, resting on middle section
-- 36v bench power supply currently used instead of batteries
-- 5v USB-C Pi4 power supply currently used instead of batteries
-- Basic motor calibration done, tested moving hub motors using serial commands issued from Pi4 daemon. Optimisation required
-- Daemon software mostly implemented
+## Progress as of May 2021
+
+- Mechanical frame built.
+- 36v (2 x 18v) batteries lashed to top panel with bungee cords, and connected via spade terminals to power bus.
+- On/off power rocker switch installed.
+- 36v to 5v DC down converter connected to power bus and wired to USB-C cable for Pi4 power.
+- Odrive board and wheels installed, wiring complete.
+- Pi4 with AHRS breakout installed, wiring complete.
+- Basic motor calibration done, tested moving hub motors using serial commands issued from Pi4 daemon. *Optimisation with odrivetool required*
+- Attached impact lances to frame, to cushion robot during the rather violent oscillations of PID tuning
+- Daemon software 95% implemented
   - CMake build system
   - Factories
   - Logging via spdlog library
   - Unit tests via google test library
   - Performance unit tests written to test AHRS at rest and drive motors via ODrive
-  - AHRS system to determine 3D space orientation written
-  - AHRS sensor calibration (with tool) support
+  - AHRS system to determine orientation in 3D space
+  - Gyroscope, accelerometer and magnetometer sensor calibration tool finished, and used to calibrate sensors in-situ after installation on chassis
   - Motor controller api
-  - Left to do: PID controller, gRPC service
-- UI software started
+  - PID controller
+- UI software barely started
   - Non-TS React interface started
+  
   - Tested against a fake REST controller served by Node.js
-  - Left to do: lots. remote control, settings, gRPC client, etc
-- TO DO: Install AHRS breakout and Pi4 more permanently, install batteries and down-converter, then big job of optimising PID controller to make the robot stay up(!)
+  
+#####TO DO:
+
+- Write gRPC service in daemon to support remote drive control
+- Complete React UI
+- Fix M1 wheel hub erroring out in controller when M0 and M1 wheels are driven under load. Probably soldering 47nF capacitors onto M1 hall sensor pins of ODrive will fix as per ODrive forum recommendations
+- Complete tuning PID controller to make the robot stay up. 
+- 3D print Bosch Power4All mounts to more securely hold batteries against fall impact (https://github.com/usedbytes/power4all looks a good resource for a base model)
 
 ## License/legal
 
