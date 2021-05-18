@@ -7,6 +7,7 @@ namespace sbrcontroller {
     // config keys
     static const std::string AHRS_FUSION_ALGORITHM_CONFIG_KEY = "/ahrs/fusionAlgorithm";
     static const std::string AHRS_SENSOR_SAMPLE_RATE_CONFIG_KEY = "/ahrs/sensorSampleRateHz";
+    static const std::string AHRS_FILTER_CONFIG_KEY = "/ahrs/filter";
     static const std::string AHRS_SENSOR_IDS_KEY = "/ahrs/sensors";
     static const std::string LOGGING_LEVEL_KEY = "/logging/level";
     static const std::string LOGGING_PATTERN_KEY = "/logging/pattern";

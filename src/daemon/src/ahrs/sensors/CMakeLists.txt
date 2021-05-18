@@ -9,6 +9,8 @@ set(ahrs_sensors_source_files
   FXOS8700Accel.h
   FXOS8700Mag.cpp
   FXOS8700Mag.h
+  TripleAxisMovingAverageFilter.h
+  TripleAxisMovingAverageFilter.cpp
 )
 add_library(ahrs_sensors ${ahrs_sensors_source_files})
 target_include_directories(ahrs_sensors PRIVATE ../ ../../ ../../coms)

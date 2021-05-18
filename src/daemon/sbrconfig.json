@@ -5,6 +5,10 @@
             "beta": 0.75
         },
         "sensorSampleRateHz": 100,
+        "filter": {
+            "id": "MovingAverage",
+            "points": 25
+        },
         "sensors": [
             {
                 "id": "FXAS2100_gyro",
@@ -52,11 +56,11 @@
         ]
     },
     "balanceControl": {
-        "Kp": 0.0,
-        "Ki": 0.0,
-        "Kd": 0.0,
-        "velocityLimit": 5.0,
-        "targetTiltAngle": 0.0
+        "Kp": 0.25,
+        "Ki": 0.2,
+        "Kd": 0.027,
+        "velocityLimit": 10.0,
+        "targetTiltAngle": -2.5
     },
     "logging": {
         "level": "info",

@@ -10,6 +10,7 @@
 #include "FXAS21002Gyro.h"
 #include "FXOS8700Accel.h"
 #include "FXOS8700Mag.h"
+#include "TripleAxisMovingAverageFilter.h"
 #include "LinuxI2CDevice.h"
 #include "LinuxSerialDevice.h"
 #include "StringReaderWriter.h"
@@ -49,13 +50,27 @@ namespace sbrcontroller {
         std::shared_ptr<ahrs::IAHRSDataSource> SBRProdFactory::CreateAHRSDataSource() const
         {
             auto fusionAlgorithm = CreateFusionAlgorithm();
+
+            auto filterConfig = Register::Config().GetConfigSection(AHRS_FILTER_CONFIG_KEY);
+            int mafPtsToFilterOver = 0;
+            bool usingMaf = false;
+            if (filterConfig->GetConfigValue("id") == "MovingAverage")
+            {
+                usingMaf = true;
+                mafPtsToFilterOver = std::stoi(filterConfig->GetConfigValue("points"));
+            }
             
             std::vector<std::shared_ptr<ISensor>> sensors;
 
             auto sensorConfigs = Register::Config().GetConfigSections(AHRS_SENSOR_IDS_KEY);
             for (auto sensorConfig : sensorConfigs)
             {
-                sensors.push_back(CreateSensor(sensorConfig));
+                auto pSensor = CreateSensor(sensorConfig);
+                if (usingMaf) {
+                    auto pLogger = Register::LoggerFactory().CreateLogger("TripleAxisMovingAverageFilter_" + sensorConfig->GetConfigValue("id"));
+                    pSensor = std::make_shared<TripleAxisMovingAverageFilter>(mafPtsToFilterOver, pSensor, pLogger);
+                }
+                sensors.push_back(pSensor);
             }
 
             int sensorSamplePeriodHz = std::stoi(Register::Config().GetConfigValue(AHRS_SENSOR_SAMPLE_RATE_CONFIG_KEY));

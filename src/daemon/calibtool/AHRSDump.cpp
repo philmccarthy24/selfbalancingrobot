@@ -21,7 +21,7 @@ namespace calibtool {
         auto updateTime = std::chrono::high_resolution_clock::now();
         auto totalElapsedUS = std::chrono::duration_cast<std::chrono::microseconds>(updateTime - m_lastLoopTime);
         int count = totalElapsedUS.count();
-        //printf("Update loop total time %d us\n", count);
+        printf("Update loop total time %d us\n", count);
         m_lastLoopTime = updateTime;
 
         std::string datum;
