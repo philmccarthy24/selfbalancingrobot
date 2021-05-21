@@ -68,16 +68,13 @@ Will provide some UML diagrams of detailed design if I get time.
   - PID controller
 - UI software barely started
   - Non-TS React interface started
-  
   - Tested against a fake REST controller served by Node.js
   
-#####TO DO:
+#### TO DO:
 
 - Write gRPC service in daemon to support remote drive control
 - Complete React UI
-- Fix M1 wheel hub erroring out in controller when M0 and M1 wheels are driven under load. Probably soldering 47nF capacitors onto M1 hall sensor pins of ODrive will fix as per ODrive forum recommendations
 - Complete tuning PID controller to make the robot stay up. 
-- 3D print Bosch Power4All mounts to more securely hold batteries against fall impact (https://github.com/usedbytes/power4all looks a good resource for a base model)
 
 ## License/legal
 
@@ -92,3 +89,4 @@ The software uses the following open source libraries, with thanks and appreciat
 - [spdlog](https://github.com/gabime/spdlog) Copyright (c) 2016 Gabi Melman.
 - [Madgwick sensor fusion algorithm](https://x-io.co.uk/open-source-imu-and-ahrs-algorithms/) Copyright (c) 2009-2021 Sebastian Madgwick
 - [Google Test](https://github.com/google/googletest) Copyright 2008, Google Inc. All rights reserved
+- [Bosch Power4All adapter design](https://github.com/usedbytes/power4all) base part Copyright 2020 Brian Starkey
