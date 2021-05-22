@@ -18,15 +18,13 @@ union() {
             topboard();
             cablerun();
         }
-        // minus cable run space and switch box interior volume
-        union() {
-            hull() {
-                translate ([-75, 82, 0]) rotate([0, 90, 0]) cylinder(r=7.5, h=150);
-                translate ([-75, 82, 10]) rotate([0, 90, 0]) cylinder(r=7.5, h=150);
-            };
-            translate ([-22.5, 45.5, 2.5]) switchbox(45, 45, 45, 7.5, 2.5);
-            translate ([-22.5, 45.5, -1]) switchbox(45, 45, 45, 7.5, 2.5);
-        }
+        // minus cable run space
+        hull() {
+            translate ([-75, 82, 0]) rotate([0, 90, 0]) cylinder(r=7.5, h=150);
+            translate ([-75, 82, 10]) rotate([0, 90, 0]) cylinder(r=7.5, h=150);
+        };
+        // mnus switch box interior volume
+        translate ([-25, 42, 0]) switchboxinterior(50,50,50);
     };
     
    difference() { 
@@ -38,11 +36,8 @@ union() {
                         difference() {
                             // main switch box
                             switchbox(50, 50, 50);
-                            // minus inteior volume
-                            union() {
-                                translate([2.5, 2.5, 2.5]) switchbox(45, 45, 45, 7.5, 2.5);
-                                translate([2.5, 2.5, -1]) switchbox(45, 45, 45, 7.5, 2.5);
-                            }
+                            // minus interior volume
+                            switchboxinterior(50, 50, 50);
                             // minus rocker switch hole
                             translate([25, 35, 35]) rotate([0, 50, 90]) cylinder(r=10, h=5);
                             
@@ -82,14 +77,23 @@ translate ([70, 82, 12]) rotate([0, 90, 0]) cylinder(r=5, h=40);
 
 }
 
-module switchbox(width, length, height, sideradius=10, topradius=5) {
+module switchbox(width, length, height, sideradius=10, topradius=5, backradius=5) {
     hull() {
-        translate([0, length-10, 0]) cube([width, 10, 20]);
+        translate([0, length-10, 0]) cube([width, 10, 10]);
         translate([0, 20, height]) rotate([0, 90, 0]) cylinder(r=topradius, h=width);
+        translate([0, length-backradius, 20]) rotate([0, 90, 0]) cylinder(r=backradius, h=width);
         translate([5, 0, 0]) cube([width-10, 5, 1]);
         translate([-5, length - (length/3), 0]) cylinder(r=sideradius, h=20);
         translate([width+5, length - (length/3), 0]) cylinder(r=sideradius, h=20);
     }   
+}
+
+module switchboxinterior(width, length, height) {
+    translate([2.5,2.5,2.5])
+    union() {
+      scale([.9,.9,.9]) switchbox(50,50,50);
+      translate([0,0,-10]) scale([.9,.9,.9]) switchbox(width, length, height);
+    }
 }
 
 module cablerun() {
