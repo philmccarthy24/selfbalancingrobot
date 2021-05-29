@@ -2,7 +2,7 @@
     "ahrs": {
         "fusionAlgorithm": {
             "id": "Madgwick",
-            "beta": 0.75
+            "beta": 0.1
         },
         "sensorSampleRateHz": 100,
         "filter": {

@@ -22,7 +22,7 @@ namespace sbrcontroller {
             m_Ki(Ki),
             m_Kd(Kd),
             m_velocityLimit(velocityLimit),
-            m_targetTiltAngleRads(targetTiltAngleDegs * (M_PI / 180)),
+            m_targetTiltAngleDegs(targetTiltAngleDegs),
             m_timeDelta(100), // 100 ms / 10 times a second seems reasonable to be adjusting wheel velocities
             m_integral(0.0f),
             m_prevError(0.0f)
@@ -61,10 +61,8 @@ namespace sbrcontroller {
             
             auto currentOri = orientation.ToEuler();
 
-            // Calculate error. We use sine function to give a non-linear response curve
-            // proportional to the component mass of the robot that is subject to gravity
-            // and therefore needs torque to counteract.
-            float error = sin(m_targetTiltAngleRads) - sin(currentOri.roll);
+            // Calculate error
+            float error = m_targetTiltAngleDegs - currentOri.GetRollInDegrees();
 
             // Proportional term
             float Pout = m_Kp * error;
@@ -107,7 +105,7 @@ namespace sbrcontroller {
         float m_Ki;
         float m_Kd;
         float m_velocityLimit;
-        float m_targetTiltAngleRads;
+        float m_targetTiltAngleDegs;
         int m_timeDelta;
         float m_integral;
         float m_prevError;
