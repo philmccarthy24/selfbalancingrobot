@@ -11,7 +11,8 @@
 #include <Adafruit_AHRS.h>
 #include <Adafruit_FXAS21002C.h>
 #include <Adafruit_FXOS8700.h>
-#include "EventBus.h"
+#include <EEPROM.h>
+#include <ArduinoLog.h>
 
 Adafruit_FXOS8700 fxos = Adafruit_FXOS8700(0x8700A, 0x8700B);
 Adafruit_FXAS21002C fxas = Adafruit_FXAS21002C(0x0021002C);
@@ -19,10 +20,13 @@ Adafruit_FXAS21002C fxas = Adafruit_FXAS21002C(0x0021002C);
 Adafruit_NXPSensorFusion filter;
 Adafruit_Sensor_Calibration_EEPROM cal;
 
+#define ZERO_TILT_AHRS_EEPROM_ADDRESS 156
+
 AHRS::AHRS(EventBus* pEventBus)
 {
   m_pEventBus = pEventBus;
   m_lastUpdate = {};
+  m_tiltOffset = 0.0f;
 }
 
 bool AHRS::Initialise(void) 
@@ -34,6 +38,15 @@ bool AHRS::Initialise(void)
   } else if (! cal.loadCalibration()) {
     Serial.println("No calibration loaded/found");
     success = false;
+  }
+
+  // read zero tilt offset from eeprom
+  EEPROM.get(ZERO_TILT_AHRS_EEPROM_ADDRESS,m_tiltOffset);
+  Log.traceln(F("Read Zero Tilt val from EEPROM = %F"), m_tiltOffset);
+  if (isnan(m_tiltOffset)) {
+    Log.traceln(F("Zero Tilt offset is NaN, so intialising it to 0.0 in EEPROM"));
+    m_tiltOffset = 0.0f;
+    EEPROM.put(ZERO_TILT_AHRS_EEPROM_ADDRESS,m_tiltOffset);
   }
 
   if (!fxos.begin() || !fxas.begin()) {
@@ -51,7 +64,11 @@ bool AHRS::Initialise(void)
 
 void AHRS::OnEventNotify(int sourceId, EEventType type, const void* eventData) 
 {
-  if (type == EEventType::TimerTimeout && sourceId == 0) {
+  if (type == EEventType::ZeroTilt) {
+    m_tiltOffset = m_lastUpdate.roll + m_tiltOffset;
+    // store the offset to EEPROM
+    EEPROM.put(ZERO_TILT_AHRS_EEPROM_ADDRESS,m_tiltOffset);
+  } else if (type == EEventType::TimerTimeout && sourceId == 0) {
     // 100hz timer has ticked
     float gx, gy, gz;
 
@@ -81,9 +98,9 @@ void AHRS::OnEventNotify(int sourceId, EEventType type, const void* eventData)
     Serial.print("Update took "); Serial.print(millis()-timestamp); Serial.println(" ms");
   #endif
 
-    m_lastUpdate.roll = filter.getRoll();
-    m_lastUpdate.pitch = filter.getPitch();
-    m_lastUpdate.yaw = filter.getYaw();
+    m_lastUpdate.roll = (filter.getRoll() / SENSORS_RADS_TO_DPS) - m_tiltOffset;
+    m_lastUpdate.pitch = filter.getPitch() / SENSORS_RADS_TO_DPS;
+    m_lastUpdate.yaw = filter.getYaw() / SENSORS_RADS_TO_DPS;
     m_lastUpdate.gyroX = gyro.gyro.x;
     m_lastUpdate.gyroY = gyro.gyro.y;
     m_lastUpdate.gyroZ = gyro.gyro.z;

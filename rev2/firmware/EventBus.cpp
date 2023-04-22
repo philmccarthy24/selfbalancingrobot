@@ -1,4 +1,5 @@
 #include "EventBus.h"
+#include <ArduinoLog.h>
 
 EventBus::EventBus() :
 m_subscribers {},

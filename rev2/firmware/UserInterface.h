@@ -28,8 +28,8 @@ private:
   EUIState m_uiState;
 
   // cached pid values for display
-  float m_Kp;
-  float m_Kd;
+  float m_cachedKp;
+  float m_cachedKd;
 
   EventBus* m_pEventBus;
 };

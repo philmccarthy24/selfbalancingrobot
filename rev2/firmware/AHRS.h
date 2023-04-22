@@ -5,6 +5,7 @@
 
 #define FILTER_UPDATE_RATE_HZ 100
 
+// these angle units are in rad or rads^-1
 typedef struct _SOrientationPayload {
   float roll;
   float pitch;
@@ -30,6 +31,7 @@ private:
   Adafruit_Sensor* m_magnetometer;
   EventBus* m_pEventBus;
   SOrientationPayload m_lastUpdate;
+  float m_tiltOffset;
 };
 
 #endif

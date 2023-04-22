@@ -1,4 +1,11 @@
 #include "MotionController.h"
+#include "AHRS.h"
+#include <EEPROM.h>
+#include <Wire.h>
+#include <Arduino.h>
+#include <ArduinoLog.h>
+
+#define MOTION_CONTROLLER_SETTINGS_EEPROM_ADDRESS 140
 
 // Printing with stream operator helper functions
 template<class T> inline Print& operator <<(Print &obj,     T arg) { obj.print(arg);    return obj; }
@@ -9,28 +16,83 @@ template<>        inline Print& operator <<(Print &obj, float arg) { obj.print(a
 // pin 1: TX - connect to ODrive RX (GPIO pin 2 on ODrive)
 HardwareSerial& odrive_serial = Serial1;
 
-MotionController::MotionController() : 
-  odrive(odrive_serial)
+MotionController::MotionController(EventBus* pEventBus) : 
+  odrive(odrive_serial),
+  m_pEventBus(pEventBus)
 {
-
 }
 
-void MotionController::Setup()
+bool MotionController::Initialise()
 {
+  Log.traceln(F("MotionController::Initialise"));
+
+  //read eeprom at offset 140 to get persisted Kp,Ki,Kd constants
+  float Kpid[3];
+  EEPROM.get(MOTION_CONTROLLER_SETTINGS_EEPROM_ADDRESS,Kpid);
+  m_Kp = Kpid[0];
+  m_Ki = Kpid[1];
+  m_Kd = Kpid[2];
+
+  Log.traceln(F("Read PID vals from EEPROM: Kp=%F, Kd=%F"), m_Kp, m_Kd);
+
+  // publish a message with read settings, to synchronise interested listeners
+  m_pEventBus->Publish(0, EEventType::SettingsSync, Kpid);
+
   // ODrive uses 115200 baud
   odrive_serial.begin(115200);
 
-  Serial.println(F("Setting ODrive current limits to 5A per wheel"));
+  Log.traceln(F("Setting ODrive current limits to 5A per wheel"));
   odrive_serial << "w axis0.motor.config.current_lim " << 5.0f << '\n';
   odrive_serial << "w axis1.motor.config.current_lim " << 5.0f << '\n';
+
+  return true;
 }
 
+void MotionController::OnEventNotify(int sourceId, EEventType type, const void* eventData)
+{
+  // AHRS updates tick on a 100hz timer, which we will match to control wheel torque.
+  // Note we have the flexibility to change this by creating an additional independent timer, caching AHRS
+  // update messages and then doing PID processing and motion control on the independent timer tick.
+
+  if (type == EEventType::AHRSUpdate) {
+    SOrientationPayload* pOri = (SOrientationPayload*)eventData;
+
+    // TODO: emergency cutoffs constants as config params rather than hard coded
+    float balanceCurrent = 0.0f;
+    if (pOri->roll < HALF_PI / 2) // 45 degrees
+    {
+      balanceCurrent = (m_Kp * pOri->roll) + (m_Kd * pOri->gyroX); //m_Ki integral term redundant for now
+    }
+    if (balanceCurrent > 5.0f)
+      balanceCurrent = 5.0f; // manual current limiter
+
+    odrive.SetCurrent(0, MOTOR_DIR_M0 * balanceCurrent);
+    odrive.SetCurrent(1, MOTOR_DIR_M1 * balanceCurrent);
+
+    // TODO: control via RC
+  } else if (type == EEventType::SettingsSync && sourceId == 1) {
+    // (cached) PID vals have been updated in UI. Update master ones in this object
+    const float* pidArray = (const float*)eventData;
+    m_Kp = pidArray[0];
+    m_Ki = pidArray[1];
+    m_Kd = pidArray[2];
+  } else if (type == EEventType::StoreData)
+  {
+    // persist new pid settings to eeprom
+    float Kpid[3];
+    Kpid[0] = m_Kp;
+    Kpid[1] = m_Ki;
+    Kpid[2] = m_Kd;
+    EEPROM.put(MOTION_CONTROLLER_SETTINGS_EEPROM_ADDRESS,Kpid);
+  }
+}
+
+/*
 // standby function
 void MotionController::Control() 
 {
   Serial.println("Setting current on motors");
-  odrive.SetCurrent(0, MOTOR_DIR_M0 * 0.5);
-  odrive.SetCurrent(1, MOTOR_DIR_M1 * 0.5);
+  
   delay(5000);
   int requested_state = AXIS_STATE_CLOSED_LOOP_CONTROL;
   Serial.println("Engaging motors");
@@ -43,3 +105,4 @@ void MotionController::Control()
   odrive.run_state(1, requested_state, false);
   delay(2000);
 }
+*/
