@@ -165,3 +165,15 @@ odrv0.axis1.controller.input_vel = 2
 odrv0.axis1.controller.input_vel = 0
 odrv0.axis1.requested_state = AXIS_STATE_IDLE
 ```
+
+We then need to put the odrive in TORQUE_CONTROL mode with 
+
+```
+odrv0.axis0.controller.config.control_mode = ControlMode.TORQUE_CONTROL
+odrv0.axis1.controller.config.control_mode = ControlMode.TORQUE_CONTROL
+odrv0.axis0.controller.config.enable_torque_mode_vel_limit = False
+odrv0.axis1.controller.config.enable_torque_mode_vel_limit = False
+
+```
+
+May also need to disable current limits

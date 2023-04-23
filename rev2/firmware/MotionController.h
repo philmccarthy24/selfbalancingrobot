@@ -2,12 +2,10 @@
 #define __MOTIONCONTROLLER_H_
 
 #include "EventBus.h"
+#include <elapsedMillis.h>
 
 #define MOTOR_DIR_M0 -1
 #define MOTOR_DIR_M1 1
-
-#include <HardwareSerial.h>
-#include <ODriveArduino.h>
 
 class MotionController : public INotifiable
 {
@@ -19,7 +17,7 @@ public:
 private:
 
   // ODrive object
-  ODriveArduino odrive;
+
   
   EventBus* m_pEventBus;
 
@@ -29,6 +27,7 @@ private:
   float m_Kd;
   // angle cut off?
   // power limit/cut off?
+  elapsedMillis logTimer;
 };
 
 #endif
